@@ -1,15 +1,45 @@
-<PageTabPanel>:
-    size_hint: 1, .1
-    tab_width: root.width / 2
-    pos_hint: {'center_x': .5, 'center_y': .9}
-    do_default_tab: False
-  
-    # Eintraege-Tab
-    TabbedPanelItem:
-        text: 'Einträge'
-  
-    # Einstellungen-Tab
-    TabbedPanelItem:
-        text: 'Einstellungen'
-        # Sortier-Knopf einbauen
-        BoxLayout:
+<MainScreen>:
+    name: 'main'
+    MainTitleBar:
+    Label:
+        text: 'hi'
+
+<SettingsScreen>:
+    name: 'settings'
+    SettingsTitleBar:
+    Label:
+        text: 'hi settings'
+
+
+<MainTitleBar@ActionBar>:
+    pos_hint: {'top':1}
+    ActionView:
+        ActionPrevious:
+            title: 'Shopping Liste'
+            app_icon: 'res/shopping_bag.png'
+            with_previous: False
+        ActionButton:
+            text: 'Sort'
+            icon: 'res/filter_list.png'
+        ActionButton:
+            text: 'Settings'
+            icon: 'res/settings.png'
+            on_release: 
+                app.root.ids.sm.current = 'settings'
+                app.root.ids.sm.transition.direction = 'left'
+
+<SettingsTitleBar@ActionBar>:
+    pos_hint: {'top':1}
+    ActionView:
+        ActionPrevious:
+            title: 'Einstellungen'
+            app_icon: 'res/settings.png'
+            on_release: 
+                app.root.ids.sm.current = 'main'
+                app.root.ids.sm.transition.direction = 'right'
+
+<MainPage>:
+    ScreenManager:
+        id: sm
+        MainScreen:
+        SettingsScreen

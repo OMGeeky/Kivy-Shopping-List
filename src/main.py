@@ -1,21 +1,27 @@
+import imp
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.tabbedpanel import TabbedPanel
+from kivy.uix.screenmanager import Screen
 
-class MainGridLayout(GridLayout):
+from kivy.config import Config
+Config.set('graphics', 'resizable', '0')
+Config.set('graphics', 'height', '1000')
+Config.set('graphics', 'width', '620')
+
+class MainScreen(Screen):
     pass
 
-class EntryBoxLayout(BoxLayout):
+class SettingsScreen(Screen):
     pass
 
-class PageTabPanel(TabbedPanel):
+class MainPage(BoxLayout):
     pass
 
 class ShoppingListApp(App):
     def build(self):
         self.title = 'Shopping List App'
-        return PageTabPanel()
-
+        return MainPage()
+    
 if __name__ == "__main__":
-    ShoppingListApp().run()
+    app = ShoppingListApp()
+    app.run()
