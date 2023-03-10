@@ -1,0 +1,1 @@
+- icons von: [Google fonts](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:shopping_bag:FILL@0;wght@400;GRAD@0;opsz@48&icon.style=Rounded)
