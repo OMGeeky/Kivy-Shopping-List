@@ -1,0 +1,15 @@
+<PageTabPanel>:
+    size_hint: 1, .1
+    tab_width: root.width / 2
+    pos_hint: {'center_x': .5, 'center_y': .9}
+    do_default_tab: False
+  
+    # Eintraege-Tab
+    TabbedPanelItem:
+        text: 'Einträge'
+  
+    # Einstellungen-Tab
+    TabbedPanelItem:
+        text: 'Einstellungen'
+        # Sortier-Knopf einbauen
+        BoxLayout:
