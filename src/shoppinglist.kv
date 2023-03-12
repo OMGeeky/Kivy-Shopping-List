@@ -1,8 +1,49 @@
+<ShoppingEntry>:
+    orientation: 'horizontal'
+    CheckBox:
+        active: root.is_checked
+    Label:
+        text: root.text
+    Button:
+        background_normal: 'res/delete.png'
+
+<FloatButton@FloatLayout>
+    id: float_root  # Giving id to button
+    size_hint: (None, None)
+    text: ''
+    btn_size: (70, 70)
+    size: (70, 70)
+    bg_color: (0.404, 0.227, 0.718, 1.0)
+ 
+    # Adding shape and all, size, position to button
+    Button:
+        text: float_root.text
+        markup: True
+        font_size: 40
+        size_hint: (None, None)
+        size: float_root.btn_size
+        pos_hint: {'right': 8.5, 'top': 1.25}
+        background_normal: ''
+        background_color: (0, 0, 0, 0)
+        canvas.before:
+            Color:
+                rgba: (0.3, 0.5, 0.2, 1.0)
+            Ellipse:
+                size: self.size
+                pos: self.pos
+
 <MainScreen>:
+    shop: shop
+
     name: 'main'
     MainTitleBar:
-    Label:
-        text: 'hi'
+    BoxLayout:
+        id: shop
+        orientation: 'vertical'
+    FloatButton:
+        text: '+'
+        markup: True
+        background_color: 1, 0, 1, 0
 
 <SettingsScreen>:
     name: 'settings'
