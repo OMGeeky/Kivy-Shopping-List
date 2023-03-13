@@ -79,8 +79,32 @@
                 app.root.ids.sm.current = 'main'
                 app.root.ids.sm.transition.direction = 'right'
 
-<MainPage>:
-    ScreenManager:
-        id: sm
-        MainScreen:
-        SettingsScreen
+#<MainPage>:
+#    ScreenManager:
+#        id: sm
+#        MainScreen:
+#        SettingsScreen
+
+<AddDialog>:
+    size_hint: 1, None
+    height: '40dp'
+    orientation: 'vertical'
+    scpaing: '5dp'
+    MDTextField:
+        id: shopping_entry_text
+        pos_hint: { 'center_y': 0.4 }
+        # SPRACHE
+        hint_text: 'Neuer Eintrag'
+        
+
+MDFloatLayout:
+    ScrollView:
+        size_hint: 0.9, 0.9
+        pos_hint: { 'center_y': 0.5, 'center_x': 0.5 }
+        MDList:
+            id: shopping_list
+    MDFloatingActionButton:
+        icon: 'plus'
+        elevation_normal: 5
+        pos_hint: { 'x': 0.9, 'y': 0.05 }
+        on_release: app.open_add_popup()

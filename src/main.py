@@ -5,11 +5,16 @@ from kivy.uix.button import Label
 from kivy.uix.screenmanager import Screen
 from kivy.config import Config
 
+from kivymd.app import MDApp
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.card.card import MDBoxLayout
+from kivymd.uix.dialog import MDDialog
+
 Config.set('graphics', 'resizable', '0')
 Config.set('graphics', 'height', '1000')
 Config.set('graphics', 'width', '620')
 
-class ShoppingEntry(BoxLayout):
+"""class ShoppingEntry(BoxLayout):
     text = StringProperty()
     is_checked = BooleanProperty()
 
@@ -37,24 +42,61 @@ class MainScreen(Screen):
 
     # load existing shopping entries
     def on_enter(self):
-        print("ENTER_MAIN_SCREEN")
-
-        entry = ShoppingEntry()
-        entry.text = "Test"
-        entry.is_checked = True
-        #self.ids["shop"].add_widget(entry)
+        pass
 
 class SettingsScreen(Screen):
-    pass
+    pass"""
 
-class MainPage(BoxLayout):
-    pass
+class AddDialog(MDBoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-class ShoppingListApp(App):
-    def build(self):
-        self.title = 'Shopping List App'
-        return MainPage()
+
+class ShoppingListApp(MDApp):
+    add_dialog: MDDialog | None = None
     
+
+    def build(self):
+        self.theme_cls.primary_palette = "Teal"
+        self.theme_cls.theme_style = "Light"
+        self.title = 'Shopping List App'
+
+    def add_shopping_entry(self):
+        pass
+
+    def open_add_popup(self):
+        if self.add_dialog:
+            return
+
+        # SPRACHE
+        buttons = [
+            MDFlatButton(text='Abbrechen', on_release=self.close_add_popup),
+            MDFlatButton(text='Bestätigen')
+        ]
+        # SPRACHE
+        self.add_dialog = MDDialog(
+            title='Eintrag hinzufügen',
+            type='custom',
+            content_cls=AddDialog(),
+            buttons=buttons
+        )
+
+        self.add_dialog.open()
+
+    # *args ist noetig, da weitere Parameter mitgegeben werden, die aber nicht genutzt werden
+    def close_add_popup(self, *args):
+        if not self.add_dialog:
+            return
+
+        self.add_dialog.dismiss()
+        self.add_dialog = None
+
+    def open_new_popup(self):
+        pass
+
+    def delete_entry(self):
+        pass
+            
 if __name__ == "__main__":
     app = ShoppingListApp()
     app.run()
