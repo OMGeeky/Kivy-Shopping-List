@@ -1,11 +1,11 @@
-<ShoppingEntry>:
-    orientation: 'horizontal'
-    CheckBox:
-        active: root.is_checked
-    Label:
-        text: root.text
-    Button:
-        background_normal: 'res/delete.png'
+#<ShoppingEntry>:
+#    orientation: 'horizontal'
+#    CheckBox:
+#        active: root.is_checked
+#    Label:
+#        text: root.text
+#    Button:
+#        background_normal: 'res/delete.png'
 
 <FloatButton@FloatLayout>
     id: float_root  # Giving id to button
@@ -85,11 +85,25 @@
 #        MainScreen:
 #        SettingsScreen
 
+<ShoppingEntry>:
+    id: shopping_entry
+    markup: True
+
+    ImageLeftWidget:
+        MDCheckbox:
+            id: shopping_entry_check
+            # bind to property
+
+    IconRightWidget:
+        icon: 'res/delete.png'
+        on_release: root.delete(shopping_entry)
+
 <AddDialog>:
     size_hint: 1, None
     height: '40dp'
     orientation: 'vertical'
-    scpaing: '5dp'
+    spacing: '5dp'
+
     MDTextField:
         id: shopping_entry_text
         pos_hint: { 'center_y': 0.4 }
@@ -98,11 +112,19 @@
         
 
 MDFloatLayout:
+
+    MDTopAppBar:
+        #SPRACHE
+        title: 'Shopping-List-App'
+        md_bg_color: app.theme_cls.accent_color
+        right_action_items: [['res/settings.png', lambda x: app.navigate_to_settings()]]
+
     ScrollView:
         size_hint: 0.9, 0.9
         pos_hint: { 'center_y': 0.5, 'center_x': 0.5 }
         MDList:
             id: shopping_list
+
     MDFloatingActionButton:
         icon: 'plus'
         elevation_normal: 5

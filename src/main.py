@@ -9,6 +9,7 @@ from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.card.card import MDBoxLayout
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.list import OneLineAvatarIconListItem
 
 Config.set('graphics', 'resizable', '0')
 Config.set('graphics', 'height', '1000')
@@ -47,6 +48,16 @@ class MainScreen(Screen):
 class SettingsScreen(Screen):
     pass"""
 
+class ShoppingEntry(OneLineAvatarIconListItem):
+    def __init__(self, text, **kwargs):
+        super().__init__(**kwargs)
+
+        self.text = text
+        self.is_checked = False
+
+    def delete(self, shopping_entry):
+        self.parent.remove_widget(shopping_entry)
+
 class AddDialog(MDBoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -54,15 +65,15 @@ class AddDialog(MDBoxLayout):
 
 class ShoppingListApp(MDApp):
     add_dialog: MDDialog | None = None
-    
 
     def build(self):
         self.theme_cls.primary_palette = "Teal"
         self.theme_cls.theme_style = "Light"
         self.title = 'Shopping List App'
 
-    def add_shopping_entry(self):
-        pass
+    def add_shopping_entry(self, text):
+        self.root.ids['shopping_list'].add_widget(ShoppingEntry(text=text))
+        self.close_add_popup()
 
     def open_add_popup(self):
         if self.add_dialog:
@@ -71,7 +82,7 @@ class ShoppingListApp(MDApp):
         # SPRACHE
         buttons = [
             MDFlatButton(text='Abbrechen', on_release=self.close_add_popup),
-            MDFlatButton(text='Bestätigen')
+            MDFlatButton(text='Bestätigen', on_release=lambda args: self.add_shopping_entry("Text"))
         ]
         # SPRACHE
         self.add_dialog = MDDialog(
