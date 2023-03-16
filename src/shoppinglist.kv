@@ -1,90 +1,3 @@
-#<ShoppingEntry>:
-#    orientation: 'horizontal'
-#    CheckBox:
-#        active: root.is_checked
-#    Label:
-#        text: root.text
-#    Button:
-#        background_normal: 'res/delete.png'
-
-<FloatButton@FloatLayout>
-    id: float_root  # Giving id to button
-    size_hint: (None, None)
-    text: ''
-    btn_size: (70, 70)
-    size: (70, 70)
-    bg_color: (0.404, 0.227, 0.718, 1.0)
- 
-    # Adding shape and all, size, position to button
-    Button:
-        text: float_root.text
-        markup: True
-        font_size: 40
-        size_hint: (None, None)
-        size: float_root.btn_size
-        pos_hint: {'right': 8.5, 'top': 1.25}
-        background_normal: ''
-        background_color: (0, 0, 0, 0)
-        canvas.before:
-            Color:
-                rgba: (0.3, 0.5, 0.2, 1.0)
-            Ellipse:
-                size: self.size
-                pos: self.pos
-
-<MainScreen>:
-    shop: shop
-
-    name: 'main'
-    MainTitleBar:
-    BoxLayout:
-        id: shop
-        orientation: 'vertical'
-    FloatButton:
-        text: '+'
-        markup: True
-        background_color: 1, 0, 1, 0
-
-<SettingsScreen>:
-    name: 'settings'
-    SettingsTitleBar:
-    Label:
-        text: 'hi settings'
-
-
-<MainTitleBar@ActionBar>:
-    pos_hint: {'top':1}
-    ActionView:
-        ActionPrevious:
-            title: 'Shopping Liste'
-            app_icon: 'res/shopping_bag.png'
-            with_previous: False
-        ActionButton:
-            text: 'Sort'
-            icon: 'res/filter_list.png'
-        ActionButton:
-            text: 'Settings'
-            icon: 'res/settings.png'
-            on_release: 
-                app.root.ids.sm.current = 'settings'
-                app.root.ids.sm.transition.direction = 'left'
-
-<SettingsTitleBar@ActionBar>:
-    pos_hint: {'top':1}
-    ActionView:
-        ActionPrevious:
-            title: 'Einstellungen'
-            app_icon: 'res/settings.png'
-            on_release: 
-                app.root.ids.sm.current = 'main'
-                app.root.ids.sm.transition.direction = 'right'
-
-#<MainPage>:
-#    ScreenManager:
-#        id: sm
-#        MainScreen:
-#        SettingsScreen
-
 <ShoppingEntry>:
     id: shopping_entry
     markup: True
@@ -109,24 +22,100 @@
         pos_hint: { 'center_y': 0.4 }
         # SPRACHE
         hint_text: 'Neuer Eintrag'
-        
+       
+<ShoppingEntryScreen>:
+    MDBoxLayout:
+        orientation: 'vertical'
+        pos_hint: { 'center_x': 0.5, 'center_y': 0.5 }
 
-MDFloatLayout:
+        MDTopAppBar:
+            #SPRACHE
+            title: 'Shopping-List-App'
+            md_bg_color: app.theme_cls.primary_color
+            specific_text_color: '#000000'
+            right_action_items: [['res/settings.png', lambda x: root.navigate_to_settings()]]
 
-    MDTopAppBar:
-        #SPRACHE
-        title: 'Shopping-List-App'
-        md_bg_color: app.theme_cls.accent_color
-        right_action_items: [['res/settings.png', lambda x: app.navigate_to_settings()]]
-
-    ScrollView:
-        size_hint: 0.9, 0.9
-        pos_hint: { 'center_y': 0.5, 'center_x': 0.5 }
-        MDList:
-            id: shopping_list
+        ScrollView:
+            size_hint: 0.85, 0.85
+            pos_hint: { 'center_y': 1, 'center_x': 0.5 }
+            MDList:
+                id: shopping_list
 
     MDFloatingActionButton:
         icon: 'plus'
         elevation_normal: 5
-        pos_hint: { 'x': 0.9, 'y': 0.05 }
-        on_release: app.open_add_popup()
+        pos_hint: { 'center_x': 0.925, 'center_y': 0.05 }
+        on_release: root.open_add_popup()
+
+<SettingsScreen>:
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDTopAppBar:
+            #SPRACHE
+            title: 'Shopping-List-App'
+            md_bg_color: app.theme_cls.primary_color
+            specific_text_color: '#000000'
+            left_action_items: [['res/arrow_back.png', lambda x: root.navigate_to_shopping_list()]]
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.5, 0.25)
+            # SPRACHE
+            MDLabel:
+                text: 'Sprache'
+            MDDropDownItem:
+                id: language_drop_down
+                text: 'Deutsch'
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.5, 0.25)
+            # SPRACHE
+            MDLabel:
+                text: 'Theme'
+            MDSwitch:
+                width: dp(36)
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.5, 0.25)
+            # SPRACHE
+            MDLabel:
+                text: 'MQTT-Server'
+            MDTextField:
+                hint_text: 'mqtt.server.de'
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.5, 0.25)
+            # SPRACHE
+            MDLabel:
+                text: 'MQTT-Topic'
+            MDTextField:
+                hint_text: 'topic'
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.5, 0.25)
+            # SPRACHE
+            MDLabel:
+                text: 'MQTT-Benutzername'
+            MDTextField:
+                hint_text: 'username'
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.5, 0.25)
+            # SPRACHE
+            MDLabel:
+                text: 'MQTT-Passwort'
+            MDTextField:
+                password: True
+
