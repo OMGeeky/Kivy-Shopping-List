@@ -7,7 +7,7 @@ from kivy.metrics import dp
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
 
-from kivymd.app import MDApp
+from kivymd.tools.hotreload.app import MDApp
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.card.card import MDBoxLayout
 from kivymd.uix.dialog import MDDialog
@@ -112,7 +112,9 @@ class SettingsScreen(Screen):
         self.menu.dismiss()
 
 class ShoppingListApp(MDApp):
-    def build(self):
+    DEBUG=1
+    KV_DIRS = ["./"]
+    def build_app(self, first=False):
         self.theme_cls.primary_palette = "Teal"
         self.theme_cls.theme_style = "Light"
         self.title = 'Shopping List App'
