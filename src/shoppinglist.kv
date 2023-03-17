@@ -1,0 +1,113 @@
+<ShoppingEntry>:
+    id: shopping_entry
+    markup: True
+
+    ImageLeftWidget:
+        MDCheckbox:
+            id: shopping_entry_check
+            # bind to property
+
+    IconRightWidget:
+        icon: 'res/delete.png'
+        on_release: root.delete(shopping_entry)
+
+<AddDialog>:
+    size_hint: 1, None
+    height: '40dp'
+    orientation: 'vertical'
+    spacing: '5dp'
+
+    MDTextField:
+        id: shopping_entry_text
+        pos_hint: { 'center_y': 0.4 }
+        # SPRACHE
+        hint_text: 'Neuer Eintrag'
+       
+<ShoppingEntryScreen>:
+    MDBoxLayout:
+        orientation: 'vertical'
+        pos_hint: { 'center_x': 0.5, 'center_y': 0.5 }
+
+        MDTopAppBar:
+            #SPRACHE
+            title: 'Shopping-List-App'
+            md_bg_color: app.theme_cls.primary_color
+            specific_text_color: '#000000'
+            right_action_items: [['res/settings.png', lambda x: root.navigate_to_settings()]]
+
+        ScrollView:
+            size_hint: 0.85, 0.85
+            pos_hint: { 'center_y': 1, 'center_x': 0.5 }
+            MDList:
+                id: shopping_list
+
+    MDFloatingActionButton:
+        icon: 'plus'
+        elevation_normal: 5
+        # bottom align is complicated
+        pos_hint: { 'top': (self.height/root.height)*1.5, 'right':0.95 }
+        on_release: root.open_add_popup()
+
+<SettingsScreen>:
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDTopAppBar:
+            #SPRACHE
+            title: 'Shopping-List-App'
+            md_bg_color: app.theme_cls.primary_color
+            specific_text_color: '#000000'
+            left_action_items: [['res/arrow_back.png', lambda x: root.navigate_to_shopping_list()]]
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.7, 0.25)
+            # SPRACHE
+            MDLabel:
+                text: 'Sprache'
+            MDDropDownItem:
+                id: language_drop_down
+                text: 'Deutsch'
+                on_release: root.show_languages_menu()
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.7, 0.25)
+            # SPRACHE
+            SettingToggleField:
+                text: 'Theme'
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.7, 0.25)
+            # SPRACHE
+            SettingTextField:
+                text: 'MQTT-Server'
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.7, 0.25)
+            # SPRACHE
+            SettingTextField:
+                text: 'MQTT-Topic'
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.7, 0.25)
+            # SPRACHE
+            SettingTextField:
+                text: 'MQTT-Benutzername'
+
+        MDBoxLayout:
+            orientation: 'horizontal'
+            pos_hint: { 'center_x': 0.5 }
+            size_hint: (0.7, 0.25)
+            # SPRACHE
+            SettingTextField:
+                text: 'MQTT-Passwort'
+
