@@ -44,7 +44,8 @@
     MDFloatingActionButton:
         icon: 'plus'
         elevation_normal: 5
-        pos_hint: { 'center_x': 0.925, 'center_y': 0.05 }
+        # bottom align is complicated
+        pos_hint: { 'top': (self.height/root.height)*1.5, 'right':0.95 }
         on_release: root.open_add_popup()
 
 <SettingsScreen>:
