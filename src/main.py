@@ -14,6 +14,9 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineAvatarIconListItem
 
+from setting_widgets.setting_fields import SettingTextField, SettingToggleField, SettingDropDownField
+
+
 LANGUAGES = { "DE": "Deutsch", "EN": "English", "FR": "Francais" }
 
 Window.size = (400, 800)
@@ -108,7 +111,6 @@ class SettingsScreen(Screen):
     def set_item(self, language_key):
         language = LANGUAGES.get(language_key)
         self.ids.language_drop_down.set_item(language)
-        print(language_key)
         self.menu.dismiss()
 
 class ShoppingListApp(MDApp):
