@@ -75,48 +75,38 @@
             pos_hint: { 'center_x': 0.5 }
             size_hint: (0.7, 0.25)
             # SPRACHE
-            MDLabel:
+            SettingToggleField:
                 text: 'Theme'
-            MDSwitch:
-                width: dp(36)
 
         MDBoxLayout:
             orientation: 'horizontal'
             pos_hint: { 'center_x': 0.5 }
             size_hint: (0.7, 0.25)
             # SPRACHE
-            MDLabel:
+            SettingTextField:
                 text: 'MQTT-Server'
-            MDTextField:
-                hint_text: 'mqtt.server.de'
 
         MDBoxLayout:
             orientation: 'horizontal'
             pos_hint: { 'center_x': 0.5 }
             size_hint: (0.7, 0.25)
             # SPRACHE
-            MDLabel:
+            SettingTextField:
                 text: 'MQTT-Topic'
-            MDTextField:
-                hint_text: 'topic'
 
         MDBoxLayout:
             orientation: 'horizontal'
             pos_hint: { 'center_x': 0.5 }
             size_hint: (0.7, 0.25)
             # SPRACHE
-            MDLabel:
+            SettingTextField:
                 text: 'MQTT-Benutzername'
-            MDTextField:
-                hint_text: 'username'
 
         MDBoxLayout:
             orientation: 'horizontal'
             pos_hint: { 'center_x': 0.5 }
             size_hint: (0.7, 0.25)
             # SPRACHE
-            MDLabel:
+            SettingTextField:
                 text: 'MQTT-Passwort'
-            MDTextField:
-                password: True
 
