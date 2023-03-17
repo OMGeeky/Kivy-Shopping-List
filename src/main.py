@@ -3,18 +3,20 @@ from kivy.app import App
 from kivy.properties import ListProperty, StringProperty, BooleanProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Label
+from kivy.metrics import dp
 from kivy.uix.screenmanager import Screen, ScreenManager
-from kivy.config import Config
+from kivy.core.window import Window
 
 from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.card.card import MDBoxLayout
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineAvatarIconListItem
 
-Config.set('graphics', 'resizable', '0')
-Config.set('graphics', 'height', '1000')
-Config.set('graphics', 'width', '620')
+LANGUAGES = { "DE": "Deutsch", "EN": "English", "FR": "Francais" }
+
+Window.size = (400, 800)
 
 class ShoppingEntry(OneLineAvatarIconListItem):
     def __init__(self, text, **kwargs):
@@ -31,7 +33,7 @@ class AddDialog(MDBoxLayout):
         super().__init__(**kwargs)
 
 class ShoppingEntryScreen(Screen):
-    add_dialog: MDDialog | None = None
+    add_dialog = None
 
     def open_add_popup(self):
         if self.add_dialog:
@@ -73,9 +75,41 @@ class ShoppingEntryScreen(Screen):
         self.manager.current = 'settings'    
 
 class SettingsScreen(Screen):
+    #languages = ListProperty(["Deutsch", "English", "Francais"])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        menu_items = [
+            {
+                "viewclass": "OneLineListItem",
+                "text": f"{LANGUAGES.get(language_key)}",
+                "height": dp(56),
+                "on_release": lambda x=f"{LANGUAGES.get(language_key)}": self.set_item(language_key),
+            } for language_key in LANGUAGES.keys()
+        ]
+
+        self.menu = MDDropdownMenu(
+            caller=self.ids.language_drop_down,
+            items=menu_items,
+            position="center",
+            width_mult=4,
+        )
+        
+        self.menu.bind()
+
     def navigate_to_shopping_list(self):
         self.manager.transition.direction = 'right'
         self.manager.current = 'shopping'
+
+    def show_languages_menu(self):
+        self.menu.open()
+
+    def set_item(self, language_key):
+        language = LANGUAGES.get(language_key)
+        self.ids.language_drop_down.set_item(language)
+        print(language_key)
+        self.menu.dismiss()
 
 class ShoppingListApp(MDApp):
     def build(self):

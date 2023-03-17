@@ -61,18 +61,19 @@
         MDBoxLayout:
             orientation: 'horizontal'
             pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.5, 0.25)
+            size_hint: (0.7, 0.25)
             # SPRACHE
             MDLabel:
                 text: 'Sprache'
             MDDropDownItem:
                 id: language_drop_down
                 text: 'Deutsch'
+                on_release: root.show_languages_menu()
 
         MDBoxLayout:
             orientation: 'horizontal'
             pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.5, 0.25)
+            size_hint: (0.7, 0.25)
             # SPRACHE
             MDLabel:
                 text: 'Theme'
@@ -82,7 +83,7 @@
         MDBoxLayout:
             orientation: 'horizontal'
             pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.5, 0.25)
+            size_hint: (0.7, 0.25)
             # SPRACHE
             MDLabel:
                 text: 'MQTT-Server'
@@ -92,7 +93,7 @@
         MDBoxLayout:
             orientation: 'horizontal'
             pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.5, 0.25)
+            size_hint: (0.7, 0.25)
             # SPRACHE
             MDLabel:
                 text: 'MQTT-Topic'
@@ -102,7 +103,7 @@
         MDBoxLayout:
             orientation: 'horizontal'
             pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.5, 0.25)
+            size_hint: (0.7, 0.25)
             # SPRACHE
             MDLabel:
                 text: 'MQTT-Benutzername'
@@ -112,7 +113,7 @@
         MDBoxLayout:
             orientation: 'horizontal'
             pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.5, 0.25)
+            size_hint: (0.7, 0.25)
             # SPRACHE
             MDLabel:
                 text: 'MQTT-Passwort'
