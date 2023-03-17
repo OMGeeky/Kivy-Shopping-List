@@ -41,8 +41,6 @@ class MqttClient:
         if callback is None:
             callback = self.__subscribe_callback
         x = json.loads(msg.payload.decode())
-        print(x)
-        print(userdata)
         callback(x, msg.topic)
 
     @staticmethod
@@ -52,7 +50,7 @@ class MqttClient:
         else:
             print("Failed to connect, return code", rc)
 
-    def publish(self, msg: dict, topic: str | None = None) -> None:
+    def publish(self, msg: dict, topic: str | None = None, retain: bool = True) -> None:
         if self.__client is None:
             self.connect()
             if self.__client is None:
@@ -60,8 +58,8 @@ class MqttClient:
 
         if topic is None:
             topic = self.__topic
-
-        result = self.__client.publish(topic, msg)
+        msg = json.dumps(msg)
+        result = self.__client.publish(topic, msg, retain=retain)
         status = result[0]
         if status != 0:
             raise MqttSendError()
@@ -120,13 +118,13 @@ def sample2():
             "message": text,
             "counter": count,
         }
-        msg = json.dumps(msg_dict, indent=4)
+        # msg = json.dumps(msg_dict, indent=4)
+        msg = msg_dict
         client.publish(msg)
 
     print("Now subscribing...")
     client.subscribe()
-    msg = input("enter message to send (& recieve?) (q to quit)\n")
-    client.publish(msg)
+    
     input("Press enter to quit...\n")
 
 
