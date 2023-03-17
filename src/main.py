@@ -38,6 +38,19 @@ class AddDialog(MDBoxLayout):
 class ShoppingEntryScreen(Screen):
     add_dialog = None
 
+    def on_bestaetigen(self, *args):
+        if self.add_dialog is None:
+            return
+        
+        text = self.add_dialog.content_cls.ids['shopping_entry_text'].text
+        print(text)
+        if not text or len(text) == 0:
+            print("Kein Text") # TODO: Fehlermeldung anzeigen
+            return
+
+        self.add_shopping_entry(text)
+        
+
     def open_add_popup(self):
         if self.add_dialog:
             return
@@ -45,14 +58,14 @@ class ShoppingEntryScreen(Screen):
         # SPRACHE
         buttons = [
             MDFlatButton(text='Abbrechen', on_release=self.close_add_popup),
-            MDFlatButton(text='Bestätigen', on_release=lambda args: self.add_shopping_entry("Text"))
+            MDFlatButton(text='Bestätigen', on_release=lambda args: self.on_bestaetigen(args)),
         ]
         # SPRACHE
         self.add_dialog = MDDialog(
             title='Eintrag hinzufügen',
             type='custom',
             content_cls=AddDialog(),
-            buttons=buttons
+            buttons=buttons,
         )
 
         self.add_dialog.open()
