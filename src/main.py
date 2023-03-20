@@ -14,8 +14,6 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineAvatarIconListItem
 
-from setting_widgets.setting_fields import SettingTextField, SettingToggleField, SettingDropDownField
-
 
 LANGUAGES = { "DE": "Deutsch", "EN": "English", "FR": "Francais" }
 
@@ -91,7 +89,6 @@ class ShoppingEntryScreen(Screen):
         self.manager.current = 'settings'    
 
 class SettingsScreen(Screen):
-    #languages = ListProperty(["Deutsch", "English", "Francais"])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
