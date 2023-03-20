@@ -1,0 +1,7 @@
+# in anaconda promt ausführen
+conda create -n kivy_venv -y python=3.9
+
+# in vscode terminal (cmd) ausführen
+conda activate kivy_venv
+conda install kivy -c conda-forge -y
+pip install -r requirements.txt
