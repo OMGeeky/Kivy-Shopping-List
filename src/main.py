@@ -14,6 +14,8 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineAvatarIconListItem
 
+import json
+from data import AppSettings
 
 LANGUAGES = { "DE": "Deutsch", "EN": "English", "FR": "Francais" }
 
@@ -89,9 +91,12 @@ class ShoppingEntryScreen(Screen):
         self.manager.current = 'settings'    
 
 class SettingsScreen(Screen):
+    settings = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.load_settings()
 
         menu_items = [
             {
@@ -123,6 +128,16 @@ class SettingsScreen(Screen):
         self.ids.language_drop_down.set_item(language)
         self.menu.dismiss()
 
+    def load_settings(self):
+        settings = AppSettings.from_json_file()
+
+        if settings is None:
+            self.create_settings_json()
+
+    def create_settings_json(self):
+        settings = AppSettings()
+        settings.to_json_file()
+            
 class ShoppingListApp(MDApp):
     def build(self):
         self.theme_cls.primary_palette = "Teal"

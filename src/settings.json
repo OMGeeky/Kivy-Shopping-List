@@ -1,0 +1,10 @@
+{
+    "settings": {
+        "language": "DE",
+        "dark_theme": false,
+        "mqtt_server": "broker.hivemq.com",
+        "mqtt_topic": "gsog/shopping",
+        "mqtt_username": "",
+        "mqtt_password": ""
+    }
+}
