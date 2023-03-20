@@ -8,7 +8,7 @@
             # bind to property
 
     IconRightWidget:
-        icon: 'res/delete.png'
+        icon: 'trash-can-outline'
         on_release: root.delete(shopping_entry)
 
 <AddDialog>:
@@ -22,6 +22,7 @@
         pos_hint: { 'center_y': 0.4 }
         # SPRACHE
         hint_text: 'Neuer Eintrag'
+        mode: "round"
        
 <ShoppingEntryScreen>:
     MDBoxLayout:
@@ -32,7 +33,7 @@
             #SPRACHE
             title: 'Shopping-List-App'
             md_bg_color: app.theme_cls.primary_color
-            specific_text_color: '#000000'
+            specific_text_color: '#1C2120'
             right_action_items: [['res/settings.png', lambda x: root.navigate_to_settings()]]
 
         ScrollView:
@@ -54,9 +55,8 @@
 
         MDTopAppBar:
             #SPRACHE
-            title: 'Shopping-List-App'
+            title: 'Einstellungen'
             md_bg_color: app.theme_cls.primary_color
-            specific_text_color: '#000000'
             left_action_items: [['res/arrow_back.png', lambda x: root.navigate_to_shopping_list()]]
 
         MDGridLayout:
@@ -81,6 +81,7 @@
                 text: 'Theme'
             MDSwitch:
                 id: theme_switch
+                widget_style: "android"
                 active: False
 
             # SPRACHE
@@ -89,6 +90,7 @@
             MDTextField:
                 id: mqtt_server_text_field
                 hint_text: 'mqtt.server.de'
+                mode: "round"
 
             # SPRACHE
             MDLabel:
@@ -96,15 +98,18 @@
             MDTextField:
                 id: mqtt_topic_text_field
                 hint_text: 'topic'
+                mode: "round"
 
             # SPRACHE
             MDLabel:
                 text: 'MQTT-Benutzername'
             MDTextField:
                 hint_text: 'username'
+                mode: "round"
 
             # SPRACHE
             MDLabel:
                 text: 'MQTT-Passwort'
             MDTextField:
                 password: True
+                mode: "round"

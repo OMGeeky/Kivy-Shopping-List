@@ -125,8 +125,9 @@ class SettingsScreen(Screen):
 
 class ShoppingListApp(MDApp):
     def build(self):
-        self.theme_cls.primary_palette = "Teal"
+        self.theme_cls.primary_palette = "Gray"
         self.theme_cls.theme_style = "Light"
+        # TODO @Tom Theme anpassen
         self.title = 'Shopping List App'
 
         sm = ScreenManager()
