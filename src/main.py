@@ -14,8 +14,8 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineAvatarIconListItem
 
-from setting_widgets.setting_fields import SettingTextField, SettingToggleField, SettingDropDownField
-
+import json
+from data import AppSettings
 
 LANGUAGES = { "DE": "Deutsch", "EN": "English", "FR": "Francais" }
 
@@ -38,6 +38,19 @@ class AddDialog(MDBoxLayout):
 class ShoppingEntryScreen(Screen):
     add_dialog = None
 
+    def on_bestaetigen(self, *args):
+        if self.add_dialog is None:
+            return
+        
+        text = self.add_dialog.content_cls.ids['shopping_entry_text'].text
+        print(text)
+        if not text or len(text) == 0:
+            print("Kein Text") # TODO: Fehlermeldung anzeigen
+            return
+
+        self.add_shopping_entry(text)
+        
+
     def open_add_popup(self):
         if self.add_dialog:
             return
@@ -45,14 +58,14 @@ class ShoppingEntryScreen(Screen):
         # SPRACHE
         buttons = [
             MDFlatButton(text='Abbrechen', on_release=self.close_add_popup),
-            MDFlatButton(text='Bestätigen', on_release=lambda args: self.add_shopping_entry("Text"))
+            MDFlatButton(text='Bestätigen', on_release=lambda args: self.on_bestaetigen(args)),
         ]
         # SPRACHE
         self.add_dialog = MDDialog(
             title='Eintrag hinzufügen',
             type='custom',
             content_cls=AddDialog(),
-            buttons=buttons
+            buttons=buttons,
         )
 
         self.add_dialog.open()
@@ -78,10 +91,12 @@ class ShoppingEntryScreen(Screen):
         self.manager.current = 'settings'    
 
 class SettingsScreen(Screen):
-    #languages = ListProperty(["Deutsch", "English", "Francais"])
+    settings = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.load_settings()
 
         menu_items = [
             {
@@ -113,10 +128,21 @@ class SettingsScreen(Screen):
         self.ids.language_drop_down.set_item(language)
         self.menu.dismiss()
 
+    def load_settings(self):
+        settings = AppSettings.from_json_file()
+
+        if settings is None:
+            self.create_settings_json()
+
+    def create_settings_json(self):
+        settings = AppSettings()
+        settings.to_json_file()
+            
 class ShoppingListApp(MDApp):
     def build(self):
-        self.theme_cls.primary_palette = "Teal"
+        self.theme_cls.primary_palette = "Gray"
         self.theme_cls.theme_style = "Light"
+        # TODO @Tom Theme anpassen
         self.title = 'Shopping List App'
 
         sm = ScreenManager()

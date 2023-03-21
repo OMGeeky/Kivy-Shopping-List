@@ -8,7 +8,7 @@
             # bind to property
 
     IconRightWidget:
-        icon: 'res/delete.png'
+        icon: 'trash-can-outline'
         on_release: root.delete(shopping_entry)
 
 <AddDialog>:
@@ -22,6 +22,7 @@
         pos_hint: { 'center_y': 0.4 }
         # SPRACHE
         hint_text: 'Neuer Eintrag'
+        mode: "round"
        
 <ShoppingEntryScreen>:
     MDBoxLayout:
@@ -32,7 +33,7 @@
             #SPRACHE
             title: 'Shopping-List-App'
             md_bg_color: app.theme_cls.primary_color
-            specific_text_color: '#000000'
+            specific_text_color: '#1C2120'
             right_action_items: [['res/settings.png', lambda x: root.navigate_to_settings()]]
 
         ScrollView:
@@ -54,15 +55,19 @@
 
         MDTopAppBar:
             #SPRACHE
-            title: 'Shopping-List-App'
+            title: 'Einstellungen'
             md_bg_color: app.theme_cls.primary_color
-            specific_text_color: '#000000'
             left_action_items: [['res/arrow_back.png', lambda x: root.navigate_to_shopping_list()]]
 
-        MDBoxLayout:
-            orientation: 'horizontal'
+        MDGridLayout:
             pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.7, 0.25)
+            size_hint: (0.9, 0.25)
+            spacing: '10dp'
+            cols: 2
+            rows: 6
+            row_force_default: True
+            row_default_height: '75dp'
+
             # SPRACHE
             MDLabel:
                 text: 'Sprache'
@@ -71,43 +76,40 @@
                 text: 'Deutsch'
                 on_release: root.show_languages_menu()
 
-        MDBoxLayout:
-            orientation: 'horizontal'
-            pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.7, 0.25)
             # SPRACHE
-            SettingToggleField:
+            MDLabel:
                 text: 'Theme'
+            MDSwitch:
+                id: theme_switch
+                widget_style: "android"
+                active: False
 
-        MDBoxLayout:
-            orientation: 'horizontal'
-            pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.7, 0.25)
             # SPRACHE
-            SettingTextField:
+            MDLabel:
                 text: 'MQTT-Server'
+            MDTextField:
+                id: mqtt_server_text_field
+                hint_text: 'mqtt.server.de'
+                mode: "round"
 
-        MDBoxLayout:
-            orientation: 'horizontal'
-            pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.7, 0.25)
             # SPRACHE
-            SettingTextField:
+            MDLabel:
                 text: 'MQTT-Topic'
+            MDTextField:
+                id: mqtt_topic_text_field
+                hint_text: 'topic'
+                mode: "round"
 
-        MDBoxLayout:
-            orientation: 'horizontal'
-            pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.7, 0.25)
             # SPRACHE
-            SettingTextField:
+            MDLabel:
                 text: 'MQTT-Benutzername'
+            MDTextField:
+                hint_text: 'username'
+                mode: "round"
 
-        MDBoxLayout:
-            orientation: 'horizontal'
-            pos_hint: { 'center_x': 0.5 }
-            size_hint: (0.7, 0.25)
             # SPRACHE
-            SettingTextField:
+            MDLabel:
                 text: 'MQTT-Passwort'
-
+            MDTextField:
+                password: True
+                mode: "round"
