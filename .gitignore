@@ -131,3 +131,7 @@ dmypy.json
 
 # Kivy
 .buildozer/
+
+.conda/
+.vscode/
+

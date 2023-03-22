@@ -6,6 +6,7 @@ from kivy.uix.button import Label
 from kivy.metrics import dp
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
+import kivy.utils
 
 from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
@@ -13,13 +14,12 @@ from kivymd.uix.card.card import MDBoxLayout
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineAvatarIconListItem
-
 import json
 from data import AppSettings
 
 LANGUAGES = { "DE": "Deutsch", "EN": "English", "FR": "Francais" }
-
-Window.size = (400, 800)
+if kivy.utils.platform not in ['android', 'ios']:
+    Window.size = (400, 800)
 
 class ShoppingEntry(OneLineAvatarIconListItem):
     def __init__(self, text, **kwargs):
