@@ -5,3 +5,4 @@ conda create -n kivy_venv -y python=3.9
 conda activate kivy_venv
 conda install kivy -c conda-forge -y
 pip install -r requirements.txt
+echo DONE!
