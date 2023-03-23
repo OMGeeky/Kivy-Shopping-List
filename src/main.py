@@ -22,6 +22,8 @@ if kivy.utils.platform not in ['android', 'ios']:
     Window.size = (400, 800)
 
 class ShoppingEntry(OneLineAvatarIconListItem):
+    edit_dialog = None
+
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
 
@@ -30,6 +32,43 @@ class ShoppingEntry(OneLineAvatarIconListItem):
 
     def delete(self, shopping_entry):
         self.parent.remove_widget(shopping_entry)
+
+    def edit_popup(self):
+        if self.edit_dialog:
+            return
+
+        # SPRACHE
+        buttons = [
+            MDFlatButton(text='Abbrechen', on_release=self.close_add_popup),
+            MDFlatButton(text='Bestätigen', on_release=lambda args: self.save_changes(args)),
+        ]
+        # SPRACHE
+        self.add_dialog = MDDialog(
+            title='Eintrag ändern',
+            type='custom',
+            content_cls=AddDialog(),
+            buttons=buttons,
+        )
+
+        self.add_dialog.open()
+
+    def save_changes(self, *args):
+        if self.edit_dialog is None:
+            return
+
+        changed_text = self.edit_dialog.content_cls.ids["shopping_entry_text"].text
+        self.text = changed_text
+
+        self.close_add_popup()
+
+    # *args ist noetig, da weitere Parameter mitgegeben werden, die aber nicht genutzt werden
+    def close_add_popup(self, *args):
+        if not self.add_dialog:
+            return
+
+        self.add_dialog.dismiss()
+        self.add_dialog = None
+
 
 class AddDialog(MDBoxLayout):
     def __init__(self, **kwargs):
@@ -43,7 +82,6 @@ class ShoppingEntryScreen(Screen):
             return
         
         text = self.add_dialog.content_cls.ids['shopping_entry_text'].text
-        print(text)
         if not text or len(text) == 0:
             print("Kein Text") # TODO: Fehlermeldung anzeigen
             return
@@ -78,7 +116,6 @@ class ShoppingEntryScreen(Screen):
         self.add_dialog.dismiss()
         self.add_dialog = None
 
-
     def add_shopping_entry(self, text):
         self.ids['shopping_list'].add_widget(ShoppingEntry(text=text))
         self.close_add_popup()
@@ -91,7 +128,7 @@ class ShoppingEntryScreen(Screen):
         self.manager.current = 'settings'    
 
 class SettingsScreen(Screen):
-    settings = ObjectProperty(None)
+    settings = ObjectProperty(AppSettings())
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

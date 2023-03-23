@@ -1,6 +1,7 @@
 <ShoppingEntry>:
     id: shopping_entry
     markup: True
+    on_touch_down: root.edit_popup()
 
     ImageLeftWidget:
         MDCheckbox:
@@ -22,6 +23,8 @@
         pos_hint: { 'center_y': 0.4 }
         # SPRACHE
         hint_text: 'Neuer Eintrag'
+        text_color_normal: "#000000"
+        text_color_focus: "#000000"
         mode: "round"
        
 <ShoppingEntryScreen>:
@@ -75,6 +78,7 @@
                 id: language_drop_down
                 text: 'Deutsch'
                 on_release: root.show_languages_menu()
+                current_item: root.settings.language
 
             # SPRACHE
             MDLabel:
@@ -82,7 +86,7 @@
             MDSwitch:
                 id: theme_switch
                 widget_style: "android"
-                active: False
+                active: root.settings.dark_theme
 
             # SPRACHE
             MDLabel:
@@ -91,6 +95,9 @@
                 id: mqtt_server_text_field
                 hint_text: 'mqtt.server.de'
                 mode: "round"
+                text_color_normal: "#000000"
+                text_color_focus: "#000000"
+                text: root.settings.mqtt_server
 
             # SPRACHE
             MDLabel:
@@ -99,6 +106,9 @@
                 id: mqtt_topic_text_field
                 hint_text: 'topic'
                 mode: "round"
+                text_color_normal: "#000000"
+                text_color_focus: "#000000"
+                text: root.settings.mqtt_topic
 
             # SPRACHE
             MDLabel:
@@ -106,6 +116,9 @@
             MDTextField:
                 hint_text: 'username'
                 mode: "round"
+                text_color_normal: "#000000"
+                text_color_focus: "#000000"
+                text: root.settings.mqtt_username
 
             # SPRACHE
             MDLabel:
@@ -113,3 +126,6 @@
             MDTextField:
                 password: True
                 mode: "round"
+                text_color_normal: "#000000"
+                text_color_focus: "#000000"
+                text: root.settings.mqtt_password
