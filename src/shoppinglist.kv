@@ -21,7 +21,7 @@
         id: shopping_entry_text
         pos_hint: { 'center_y': 0.4 }
         # SPRACHE
-        hint_text: 'Neuer Eintrag'
+        hint_text: root.get_translated('new_entry')
         mode: "round"
        
 <ShoppingEntryScreen>:
@@ -30,8 +30,7 @@
         pos_hint: { 'center_x': 0.5, 'center_y': 0.5 }
 
         MDTopAppBar:
-            #SPRACHE
-            title: 'Shopping-List-App'
+            title: root.get_translated('app_title')
             md_bg_color: app.theme_cls.primary_color
             specific_text_color: '#1C2120'
             right_action_items: [['res/settings.png', lambda x: root.navigate_to_settings()]]
@@ -54,8 +53,7 @@
         orientation: 'vertical'
 
         MDTopAppBar:
-            #SPRACHE
-            title: 'Einstellungen'
+            title: root.get_translated('settings')
             md_bg_color: app.theme_cls.primary_color
             left_action_items: [['res/arrow_back.png', lambda x: root.navigate_to_shopping_list()]]
 
@@ -68,48 +66,46 @@
             row_force_default: True
             row_default_height: '75dp'
 
-            # SPRACHE
             MDLabel:
-                text: 'Sprache'
+                text: root.get_translated('language')
             MDDropDownItem:
                 id: language_drop_down
+                # SPRACHE?
                 text: 'Deutsch'
                 on_release: root.show_languages_menu()
 
-            # SPRACHE
             MDLabel:
-                text: 'Theme'
+                text: root.get_translated('theme')
             MDSwitch:
                 id: theme_switch
                 widget_style: "android"
                 active: False
 
-            # SPRACHE
             MDLabel:
-                text: 'MQTT-Server'
+                text: root.get_translated('mqtt-server')
             MDTextField:
                 id: mqtt_server_text_field
+                # SPRACHE?
                 hint_text: 'mqtt.server.de'
                 mode: "round"
 
-            # SPRACHE
             MDLabel:
-                text: 'MQTT-Topic'
+                text: root.get_translated('mqtt-topic')
             MDTextField:
                 id: mqtt_topic_text_field
+                # SPRACHE?
                 hint_text: 'topic'
                 mode: "round"
 
-            # SPRACHE
             MDLabel:
-                text: 'MQTT-Benutzername'
+                text: root.get_translated('mqtt-username')
             MDTextField:
+                # SPRACHE?
                 hint_text: 'username'
                 mode: "round"
 
-            # SPRACHE
             MDLabel:
-                text: 'MQTT-Passwort'
+                text: root.get_translated('mqtt-password')
             MDTextField:
                 password: True
                 mode: "round"

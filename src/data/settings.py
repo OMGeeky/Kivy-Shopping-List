@@ -1,5 +1,9 @@
 from dataclasses import dataclass, asdict
 import json
+from pathlib import Path
+
+FILES_PATH = Path("files")
+settings_file_path = Path(FILES_PATH,'settings.json')
 
 @dataclass
 class AppSettings:
@@ -13,7 +17,9 @@ class AppSettings:
     def to_json_file(self):
         settings_dict = {"settings": asdict(self)}
         try:
-            with open("settings.json", "x") as json_file:
+            if not FILES_PATH.is_dir():
+                FILES_PATH.mkdir()
+            with open(settings_file_path, "x") as json_file:
                 json.dump(settings_dict, json_file, indent=4)
         except FileExistsError:
             return
@@ -23,7 +29,7 @@ class AppSettings:
         settings_dict = None
 
         try:
-            with open("settings.json", "r") as json_file:
+            with open(settings_file_path, "r") as json_file:
                 settings_dict = json.load(json_file)
         except FileNotFoundError:
             return None
@@ -41,3 +47,13 @@ class AppSettings:
 
         print(new_settings)
         return new_settings
+
+    @staticmethod
+    def get_or_create():        
+        settings = AppSettings.from_json_file()
+
+        if settings is None:
+            settings = AppSettings()
+            settings.to_json_file()
+        
+        return settings

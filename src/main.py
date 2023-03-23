@@ -1,4 +1,5 @@
 from os import name
+from typing import Optional
 from kivy.app import App
 from kivy.properties import ListProperty, StringProperty, BooleanProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -16,8 +17,9 @@ from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineAvatarIconListItem
 import json
 from data import AppSettings
+from language import TranslationProvider, LANGUAGES
 
-LANGUAGES = { "DE": "Deutsch", "EN": "English", "FR": "Francais" }
+
 if kivy.utils.platform not in ['android', 'ios']:
     Window.size = (400, 800)
 
@@ -34,8 +36,13 @@ class ShoppingEntry(OneLineAvatarIconListItem):
 class AddDialog(MDBoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+    
+    def get_translated(self, key:str)->str:
+        settings = AppSettings.get_or_create()
+        return TranslationProvider.get_translated(key, settings.language)
 
 class ShoppingEntryScreen(Screen):
+    settings : Optional[AppSettings] = None
     add_dialog = None
 
     def on_bestaetigen(self, *args):
@@ -55,14 +62,14 @@ class ShoppingEntryScreen(Screen):
         if self.add_dialog:
             return
 
-        # SPRACHE
+        language = self.get_settings().language
+
         buttons = [
-            MDFlatButton(text='Abbrechen', on_release=self.close_add_popup),
-            MDFlatButton(text='Bestätigen', on_release=lambda args: self.on_bestaetigen(args)),
+            MDFlatButton(text=TranslationProvider.get_translated('cancel', language), on_release=self.close_add_popup),
+            MDFlatButton(text=TranslationProvider.get_translated('confirm', language), on_release=lambda args: self.on_bestaetigen(args)),
         ]
-        # SPRACHE
         self.add_dialog = MDDialog(
-            title='Eintrag hinzufügen',
+            title=TranslationProvider.get_translated('add_entry', language),
             type='custom',
             content_cls=AddDialog(),
             buttons=buttons,
@@ -89,6 +96,19 @@ class ShoppingEntryScreen(Screen):
     def navigate_to_settings(self):
         self.manager.transition.direction = 'left'
         self.manager.current = 'settings'    
+        self.settings = None # reset settings to reload them after change
+
+    def load_settings(self)->None:
+        if not self.settings:
+            self.settings = AppSettings.get_or_create()
+
+    def get_settings(self) -> AppSettings:
+        self.load_settings()
+        return self.settings # type: ignore
+    
+    def get_translated(self, key) -> str:
+        language = self.get_settings().language
+        return TranslationProvider.get_translated(key,language)
 
 class SettingsScreen(Screen):
     settings = ObjectProperty(None)
@@ -96,7 +116,7 @@ class SettingsScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.load_settings()
+        self.settings = AppSettings.get_or_create()
 
         menu_items = [
             {
@@ -127,16 +147,13 @@ class SettingsScreen(Screen):
         language = LANGUAGES.get(language_key)
         self.ids.language_drop_down.set_item(language)
         self.menu.dismiss()
+    
+    def get_translated(self, key) -> str:
+        if self.settings is None:
+            self.settings = AppSettings.get_or_create()
 
-    def load_settings(self):
-        settings = AppSettings.from_json_file()
-
-        if settings is None:
-            self.create_settings_json()
-
-    def create_settings_json(self):
-        settings = AppSettings()
-        settings.to_json_file()
+        language = self.settings.language
+        return TranslationProvider.get_translated(key,language)
             
 class ShoppingListApp(MDApp):
     def build(self):
