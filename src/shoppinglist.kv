@@ -1,6 +1,7 @@
 <ShoppingEntry>:
     id: shopping_entry
     markup: True
+    on_touch_down: root.edit_popup()
 
     ImageLeftWidget:
         MDCheckbox:
@@ -22,6 +23,8 @@
         pos_hint: { 'center_y': 0.4 }
         # SPRACHE
         hint_text: root.get_translated('new_entry')
+        text_color_normal: "#000000"
+        text_color_focus: "#000000"
         mode: "round"
        
 <ShoppingEntryScreen>:
@@ -73,13 +76,14 @@
                 # SPRACHE?
                 text: 'Deutsch'
                 on_release: root.show_languages_menu()
+                current_item: root.settings.language
 
             MDLabel:
                 text: root.get_translated('theme')
             MDSwitch:
                 id: theme_switch
                 widget_style: "android"
-                active: False
+                active: root.settings.dark_theme
 
             MDLabel:
                 text: root.get_translated('mqtt-server')
@@ -88,6 +92,9 @@
                 # SPRACHE?
                 hint_text: 'mqtt.server.de'
                 mode: "round"
+                text_color_normal: "#000000"
+                text_color_focus: "#000000"
+                text: root.settings.mqtt_server
 
             MDLabel:
                 text: root.get_translated('mqtt-topic')
@@ -96,6 +103,9 @@
                 # SPRACHE?
                 hint_text: 'topic'
                 mode: "round"
+                text_color_normal: "#000000"
+                text_color_focus: "#000000"
+                text: root.settings.mqtt_topic
 
             MDLabel:
                 text: root.get_translated('mqtt-username')
@@ -103,9 +113,15 @@
                 # SPRACHE?
                 hint_text: 'username'
                 mode: "round"
+                text_color_normal: "#000000"
+                text_color_focus: "#000000"
+                text: root.settings.mqtt_username
 
             MDLabel:
                 text: root.get_translated('mqtt-password')
             MDTextField:
                 password: True
                 mode: "round"
+                text_color_normal: "#000000"
+                text_color_focus: "#000000"
+                text: root.settings.mqtt_password
