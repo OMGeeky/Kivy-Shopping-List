@@ -1,6 +1,4 @@
-from cgitb import text
 import json
-from os import name
 from typing import Optional
 from data import AppSettings
 from language import TranslationProvider, LANGUAGES
@@ -186,7 +184,7 @@ class SettingsScreen(Screen):
                 "viewclass": "OneLineListItem",
                 "text": f"{LANGUAGES.get(language_key)}",
                 "height": dp(56),
-                "on_release": lambda x=f"{LANGUAGES.get(language_key)}": self.set_item(language_key),
+                "on_release": lambda x=language_key: self.set_item(x),
             } for language_key in LANGUAGES.keys()
         ]
 
@@ -200,7 +198,6 @@ class SettingsScreen(Screen):
         self.menu.bind()
 
     def navigate_to_shopping_list(self):
-        print(self.settings)
         self.manager.transition.direction = 'right'
         self.manager.current = 'shopping'
 
