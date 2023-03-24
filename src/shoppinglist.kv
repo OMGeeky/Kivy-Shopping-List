@@ -1,7 +1,7 @@
 <ShoppingEntry>:
     id: shopping_entry
     markup: True
-    on_touch_down: root.edit_popup()
+    on_release: root.edit_popup()
 
     ImageLeftWidget:
         MDCheckbox:
@@ -23,6 +23,7 @@
         pos_hint: { 'center_y': 0.4 }
         # SPRACHE
         hint_text: root.get_translated('new_entry')
+        text: root.text
         text_color_normal: "#000000"
         text_color_focus: "#000000"
         mode: "round"

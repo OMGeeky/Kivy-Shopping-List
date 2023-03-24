@@ -45,7 +45,6 @@ class AppSettings:
             mqtt_password=settings_values["mqtt_password"],
         )
 
-        print(new_settings)
         return new_settings
 
     @staticmethod

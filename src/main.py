@@ -1,5 +1,9 @@
+from cgitb import text
 from os import name
 from typing import Optional
+from data import AppSettings
+from language import TranslationProvider, LANGUAGES
+
 from kivy.app import App
 from kivy.properties import ListProperty, StringProperty, BooleanProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -15,10 +19,7 @@ from kivymd.uix.card.card import MDBoxLayout
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineAvatarIconListItem
-import json
-from data import AppSettings
-from language import TranslationProvider, LANGUAGES
-
+from kivymd.toast import toast
 
 if kivy.utils.platform not in ['android', 'ios']:
     Window.size = (400, 800)
@@ -41,40 +42,48 @@ class ShoppingEntry(OneLineAvatarIconListItem):
 
         # SPRACHE
         buttons = [
-            MDFlatButton(text='Abbrechen', on_release=self.close_add_popup),
+            MDFlatButton(text='Abbrechen', on_release=self.close_edit_popup),
             MDFlatButton(text='Bestätigen', on_release=lambda args: self.save_changes(args)),
         ]
         # SPRACHE
-        self.add_dialog = MDDialog(
+        self.edit_dialog = MDDialog(
             title='Eintrag ändern',
             type='custom',
-            content_cls=AddDialog(),
+            content_cls=AddDialog(self.text),
             buttons=buttons,
         )
 
-        self.add_dialog.open()
+        self.edit_dialog.open()
 
     def save_changes(self, *args):
         if self.edit_dialog is None:
             return
 
         changed_text = self.edit_dialog.content_cls.ids["shopping_entry_text"].text
-        self.text = changed_text
-
-        self.close_add_popup()
-
-    # *args ist noetig, da weitere Parameter mitgegeben werden, die aber nicht genutzt werden
-    def close_add_popup(self, *args):
-        if not self.add_dialog:
+        if not changed_text or len(changed_text) == 0:
+            # SPRACHE
+            toast("The entry text cannot be empty.")
             return
 
-        self.add_dialog.dismiss()
-        self.add_dialog = None
+        self.text = changed_text
+
+        self.close_edit_popup()
+
+    # *args ist noetig, da weitere Parameter mitgegeben werden, die aber nicht genutzt werden
+    def close_edit_popup(self, *args):
+        if not self.edit_dialog:
+            return
+
+        self.edit_dialog.dismiss()
+        self.edit_dialog = None
 
 
 class AddDialog(MDBoxLayout):
-    def __init__(self, **kwargs):
+    text = StringProperty("")
+
+    def __init__(self, text="", **kwargs):
         super().__init__(**kwargs)
+        self.text = text
     
     def get_translated(self, key:str)->str:
         settings = AppSettings.get_or_create()
@@ -90,12 +99,12 @@ class ShoppingEntryScreen(Screen):
         
         text = self.add_dialog.content_cls.ids['shopping_entry_text'].text
         if not text or len(text) == 0:
-            print("Kein Text") # TODO: Fehlermeldung anzeigen
+            # SPRACHE
+            toast("The entry text cannot be empty.")
             return
 
         self.add_shopping_entry(text)
         
-
     def open_add_popup(self):
         if self.add_dialog:
             return
@@ -148,7 +157,7 @@ class ShoppingEntryScreen(Screen):
         return TranslationProvider.get_translated(key,language)
 
 class SettingsScreen(Screen):
-    settings = ObjectProperty(AppSettings())
+    settings = ObjectProperty(AppSettings(), rebind=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -174,6 +183,7 @@ class SettingsScreen(Screen):
         self.menu.bind()
 
     def navigate_to_shopping_list(self):
+        print(self.settings)
         self.manager.transition.direction = 'right'
         self.manager.current = 'shopping'
 
