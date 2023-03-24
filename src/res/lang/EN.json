@@ -1,15 +1,15 @@
 {
-    "cancel": "Cancel"
-    ,"confirm": "Confirm"
-    ,"add_entry": "Add Entry"
-    ,"new_entry": "New Entry"
-    ,"app_title":"Shopping-List-App"
-    ,"settings": "Settings"
-    ,"language": "Language"
-    ,"theme":"Theme"
-    ,"mqtt-server":"MQTT-Server"
-    ,"mqtt-topic":"MQTT-Topic"
-    ,"mqtt-username":"MQTT-Username"
-    ,"mqtt-password":"MQTT-Password"
-    
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "add_entry": "Add entry",
+    "new_entry": "New entry",
+    "edit_entry": "Edit entry",
+    "app_title": "Shopping-List-App",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "mqtt-server": "MQTT-Server",
+    "mqtt-topic": "MQTT-Topic",
+    "mqtt-username": "MQTT-Username",
+    "mqtt-password": "MQTT-Password"
 }
