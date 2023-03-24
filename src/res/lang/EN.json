@@ -6,6 +6,7 @@
     "edit_entry": "Edit entry",
     "app_title": "Shopping-List-App",
     "settings": "Settings",
+    "empty_text_alert": "The entry text cannot be empty.",
     "language": "Language",
     "theme": "Theme",
     "mqtt-server": "MQTT-Server",
