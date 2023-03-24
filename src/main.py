@@ -1,13 +1,13 @@
 from cgitb import text
+import json
 from os import name
 from typing import Optional
 from data import AppSettings
 from language import TranslationProvider, LANGUAGES
+from pathlib import Path
 
 from kivy.app import App
 from kivy.properties import ListProperty, StringProperty, BooleanProperty, ObjectProperty
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Label
 from kivy.metrics import dp
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
@@ -20,6 +20,10 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineAvatarIconListItem
 from kivymd.toast import toast
+
+FILES_PATH = Path("files")
+settings_file_path = Path(FILES_PATH,'settings.json')
+entries_file_path = Path(FILES_PATH, 'entries.json')
 
 if kivy.utils.platform not in ['android', 'ios']:
     Window.size = (400, 800)
@@ -136,8 +140,21 @@ class ShoppingEntryScreen(Screen):
         self.ids['shopping_list'].add_widget(ShoppingEntry(text=text))
         self.close_add_popup()
 
-    def delete_entry(self):
-        pass
+    def export_entries_to_json(self):
+        settings_dict = {"entries": []}
+
+        for entry in self.ids.shopping_list.children:
+            entry_dict = {"is_checked": entry.is_checked, "text": entry.text}
+            settings_dict["entries"].append(entry_dict)
+
+        try:
+            if not FILES_PATH.is_dir():
+                FILES_PATH.mkdir()
+            with open(entries_file_path, "x") as json_file:
+                json.dump(settings_dict, json_file, indent=4)
+        except FileExistsError:
+            with open(entries_file_path, "w") as json_file:
+                json.dump(settings_dict, json_file, indent=4)
 
     def navigate_to_settings(self):
         self.manager.transition.direction = 'left'
