@@ -1,0 +1,15 @@
+{
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "add_entry": "Ajouter une entrée",
+    "new_entry": "Nouvelle entrée",
+    "edit_entry": "Éditer une entrée",
+    "app_title": "Shopping-List-App",
+    "settings": "Paramètres",
+    "language": "Longue",
+    "theme": "Thème",
+    "mqtt-server": "MQTT-Server",
+    "mqtt-topic": "MQTT-Topic",
+    "mqtt-username": "nom d'utilisateur MQTT",
+    "mqtt-password": "Mot de passe MQTT"
+}
