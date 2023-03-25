@@ -135,4 +135,4 @@ dmypy.json
 .conda/
 .vscode/
 
-*/settings.json
+files/*
