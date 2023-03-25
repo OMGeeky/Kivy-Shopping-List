@@ -12,5 +12,6 @@
     "mqtt-server": "MQTT-Server",
     "mqtt-topic": "MQTT-Topic",
     "mqtt-username": "nom d'utilisateur MQTT",
-    "mqtt-password": "Mot de passe MQTT"
+    "mqtt-password": "Mot de passe MQTT",
+    "change_setting_restart_alert": "TODO: #SPRACHE"
 }

@@ -12,5 +12,6 @@
     "mqtt-server": "MQTT-Server",
     "mqtt-topic": "MQTT-Topic",
     "mqtt-username": "MQTT-Benutzername",
-    "mqtt-password": "MQTT-Passwort"
+    "mqtt-password": "MQTT-Passwort",
+    "change_setting_restart_alert": "Diese Änderung wird erst nach einem Neustart der App wirksam."
 }
