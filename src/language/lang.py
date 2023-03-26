@@ -22,6 +22,7 @@ class TranslationProvider:
 
         path = Path(cls.src_dir, LANGUAGE_FOLDER, f"{language}.json")
         print(f"loading language file: {path}")
+        print(f'src_dir: {cls.src_dir}')
         try:
             with open(path, "r", encoding="utf-8") as f:
                 result = json.load(f)
