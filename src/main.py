@@ -1,4 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
+from pathlib import Path
+
 from data import AppSettings
 from data.files import read_entries_from_files, write_entries_to_files
 from language import TranslationProvider, LANGUAGES
@@ -321,7 +323,9 @@ class ShoppingListApp(MDApp):
         self.title = "Shopping List App"
         self.settings = AppSettings.get_or_create()
         print(self.settings)
-
+        print(self.user_data_dir)
+        print(self.directory)
+        TranslationProvider.src_dir = Path(self.directory)
         
         # TODO @Tom Theme anpassen
         self.theme_cls.primary_palette = "Gray"
