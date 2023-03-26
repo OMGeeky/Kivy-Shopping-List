@@ -31,10 +31,7 @@ jobs:
         with:
           path: src/.buildozer
           key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('src/buildozer.spec') }}
-          
-      - name: Cache Gradle
-        uses: burrunan/gradle-cache-action@v1
-      
+                
       - name: Checkout
         uses: actions/checkout@v2
 
