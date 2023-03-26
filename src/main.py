@@ -1,7 +1,8 @@
 import json
 import os
-from typing import Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 from data import AppSettings
+from data.files import read_entries_from_files, write_entries_to_files
 from language import TranslationProvider, LANGUAGES
 from pathlib import Path
 
@@ -19,9 +20,6 @@ from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineAvatarIconListItem
 from kivymd.toast import toast
 
-FILES_PATH = Path("files")
-settings_file_path = Path(FILES_PATH, "settings.json")
-entries_file_path = Path(FILES_PATH, "entries.json")
 
 if kivy.utils.platform not in ["android", "ios"]:
     Window.size = (400, 800)
@@ -153,27 +151,21 @@ class ShoppingEntryScreen(Screen):
         self.ids["shopping_list"].add_widget(ShoppingEntry(text=text))
         self.close_add_popup()
 
-    def export_entries_to_json(self):
-        settings_dict = {"entries": []}
-
-        for entry in self.ids.shopping_list.children:
-            entry_dict = {"is_checked": entry.is_checked, "text": entry.text}
-            settings_dict["entries"].append(entry_dict)
-
+    def export_entries(self):
+        entries = self.get_entires()
+        entries_dict = {"entries": entries}
         try:
-            if not FILES_PATH.is_dir():
-                FILES_PATH.mkdir()
-
-            if os.path.exists(entries_file_path):
-                access_mode = "w"
-            else:
-                access_mode = "x"
-
-            with open(entries_file_path, access_mode) as json_file:
-                json.dump(settings_dict, json_file, indent=4)
-
+            write_entries_to_files(entries_dict)
         except OSError:
             return
+    def get_entires(self):
+        entries = []
+        for entry in self.ids.shopping_list.children:
+            entry_dict = {"is_checked": entry.is_checked, "text": entry.text}
+            entries.append(entry_dict)
+        
+        entries.sort(key=lambda entry: (entry['is_checked'], entry['text']))
+        return entries
 
     def navigate_to_settings(self):
         self.manager.transition.direction = "left"
