@@ -6,10 +6,12 @@
     "edit_entry": "Eintrag ändern",
     "app_title": "Shopping-List-App",
     "settings": "Einstellungen",
+    "empty_text_alert": "Der Eintrag-Text darf nicht leer sein.",
     "language": "Sprache",
     "theme": "Theme",
     "mqtt-server": "MQTT-Server",
     "mqtt-topic": "MQTT-Topic",
     "mqtt-username": "MQTT-Benutzername",
-    "mqtt-password": "MQTT-Passwort"
+    "mqtt-password": "MQTT-Passwort",
+    "change_setting_restart_alert": "Diese Änderung wird erst nach einem Neustart der App wirksam."
 }

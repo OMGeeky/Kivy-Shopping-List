@@ -7,6 +7,8 @@
         MDCheckbox:
             id: shopping_entry_check
             # bind to property
+            active: root.is_checked
+            on_active: root.is_checked = self.active
 
     IconRightWidget:
         icon: 'trash-can-outline'
@@ -77,14 +79,16 @@
                 # SPRACHE?
                 text: 'Deutsch'
                 on_release: root.show_languages_menu()
-                current_item: root.settings.language
+                current_item: app.settings.language
+                on_current_item: root.update_language()
 
             MDLabel:
                 text: root.get_translated('theme')
             MDSwitch:
                 id: theme_switch
                 widget_style: "android"
-                active: root.settings.dark_theme
+                active: app.settings.dark_theme
+                on_active: root.switch_theme()
 
             MDLabel:
                 text: root.get_translated('mqtt-server')
@@ -95,7 +99,8 @@
                 mode: "round"
                 text_color_normal: "#000000"
                 text_color_focus: "#000000"
-                text: root.settings.mqtt_server
+                text: app.settings.mqtt_server
+                on_text: root.update_settings()
 
             MDLabel:
                 text: root.get_translated('mqtt-topic')
@@ -106,23 +111,28 @@
                 mode: "round"
                 text_color_normal: "#000000"
                 text_color_focus: "#000000"
-                text: root.settings.mqtt_topic
+                text: app.settings.mqtt_topic
+                on_text: root.update_settings()
 
             MDLabel:
                 text: root.get_translated('mqtt-username')
             MDTextField:
+                id: mqtt_username_text_field
                 # SPRACHE?
                 hint_text: 'username'
                 mode: "round"
                 text_color_normal: "#000000"
                 text_color_focus: "#000000"
-                text: root.settings.mqtt_username
+                text: app.settings.mqtt_username
+                on_text: root.update_settings()
 
             MDLabel:
                 text: root.get_translated('mqtt-password')
             MDTextField:
+                id: mqtt_password_text_field
                 password: True
                 mode: "round"
                 text_color_normal: "#000000"
                 text_color_focus: "#000000"
-                text: root.settings.mqtt_password
+                text: app.settings.mqtt_password
+                on_text: root.update_settings()

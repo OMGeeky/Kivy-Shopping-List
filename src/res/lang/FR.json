@@ -6,10 +6,12 @@
     "edit_entry": "Éditer une entrée",
     "app_title": "Shopping-List-App",
     "settings": "Paramètres",
+    "empty_text_alert": "Le text d'entrée ne peut pas être vide.",
     "language": "Longue",
     "theme": "Thème",
     "mqtt-server": "MQTT-Server",
     "mqtt-topic": "MQTT-Topic",
     "mqtt-username": "nom d'utilisateur MQTT",
-    "mqtt-password": "Mot de passe MQTT"
+    "mqtt-password": "Mot de passe MQTT",
+    "change_setting_restart_alert": "TODO: #SPRACHE"
 }
