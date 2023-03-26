@@ -326,7 +326,7 @@ class ShoppingListApp(MDApp):
         print(self.user_data_dir)
         print(self.directory)
         
-        if kivy.utils.platform not in ["android", "ios"]:
+        if kivy.utils.platform in ["android", "ios"]:
             TranslationProvider.src_dir = Path(self.user_data_dir, 'app')
         else:
             TranslationProvider.src_dir = Path(self.directory)
