@@ -4,7 +4,7 @@ from typing import Dict, Optional
 
 
 LANGUAGES = {"DE": "Deutsch", "EN": "English", "FR": "Francais"}
-LANGUAGE_FOLDER = Path("res", "lang")
+LANGUAGE_FOLDER = Path("src","res", "lang")
 
 
 class TranslationProvider:
