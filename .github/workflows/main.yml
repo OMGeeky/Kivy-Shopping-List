@@ -24,12 +24,12 @@ jobs:
       - name: Cache Buildozer global directory
         uses: actions/cache@v2
         with:
-          path: src/.buildozer_global
+          path: /github/workspace/./.buildozer_global
           key: buildozer-global-${{ hashFiles('src/buildozer.spec') }} # Replace with your path
 
       - uses: actions/cache@v2
         with:
-          path: src/.buildozer
+          path: /github/workspace/src/.buildozer            
           key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('src/buildozer.spec') }}
                 
       - name: Checkout
