@@ -352,8 +352,12 @@ class ShoppingListApp(MDApp):
                                subscribe_callback=lambda msg_dict, _:shoppingEntryScreen.update_from_mqtt(msg_dict),
                                username=self.settings.mqtt_username,
                                password=self.settings.mqtt_password)
-        self.mqtt.connect()
-        self.mqtt.subscribe()
+        try:
+            self.mqtt.connect()
+            self.mqtt.subscribe()
+        except Exception as e:
+            print(e)
+            toast("MQTT-Connection failed")
         return sm
 
     def update_theme(self):

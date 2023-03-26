@@ -74,7 +74,8 @@ class MqttClient:
         result = self.__client.publish(topic, msg_str, retain=retain)
         status = result[0]
         if status != 0:
-            raise MqttSendError()
+            print("Failed to send message to MQTT broker")
+            # raise MqttSendError()
 
     def subscribe(self, callback=None) -> None:
         if self.__client is None:
@@ -88,12 +89,13 @@ class MqttClient:
     def connect(self) -> None:
         self.__client = mqtt_client.Client(self.__client_id)
         if self.__username:
+            print("setting username and password")
             self.__client.username_pw_set(self.__username, self.__password)
 
         self.__client.on_connect = self.on_connect
         print("Connecting to MQTT broker...")
-        print(self.__broker, self.__port)
-        self.__client.connect(self.__broker, self.__port)
+        print('broker:',self.__broker, 'port:', self.__port)
+        self.__client.connect(host=self.__broker, port= self.__port)
         self.__client.loop_start()
 
     def disconnect(self) -> None:
