@@ -29,17 +29,17 @@ class MqttClient:
         port: int,
         topic: str,
         subscribe_callback: Callable[[dict, str], None],
-        username: str | None = None,
-        password: str | None = None,
-        client_id: str | None = None,
+        username: Optional[str]  = None,
+        password: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         self.set_target(broker, topic, port, username, password)
-        if self.__client_id is None:
+        if client_id is None:
             self.__client_id = f"python-mqtt-{random.randint(0, 1000)}"
-        self.__client: mqtt_client.Client | None = None
+        self.__client: Optional[mqtt_client.Client] = None
         self.__subscribe_callback = subscribe_callback
 
-    def set_target(self, broker: str, topic:str, port: int, username: str | None = None, password: str | None = None):
+    def set_target(self, broker: str, topic:str, port: int, username: Optional[str] = None, password: Optional[str] = None):
         broker, port = _get_broker_and_port(broker, port)
         self.__broker = broker
         self.__port = port
@@ -61,7 +61,7 @@ class MqttClient:
         else:
             print("Failed to connect, return code", rc)
 
-    def publish(self, msg: dict, topic: str | None = None, retain: bool = True) -> None:
+    def publish(self, msg: dict, topic: Optional[str] = None, retain: bool = True) -> None:
         if self.__client is None:
             self.connect()
             if self.__client is None:
