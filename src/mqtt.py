@@ -1,5 +1,5 @@
 import random
-from typing import Callable
+from typing import Callable, Optional, Tuple
 from paho.mqtt import client as mqtt_client
 import json
 
@@ -13,6 +13,14 @@ class MqttSendError(ConnectionError):
     def __init__(self, *args: object) -> None:
         super().__init__("Error sending message to MQTT broker", *args)
 
+def _get_broker_and_port(broker: str, port: int):
+        print('getting broker and port', broker, port)
+              
+        if ':' in broker:
+            broker, port = broker.split(':') # type: ignore
+            port = int(port)
+
+        return broker, port
 
 class MqttClient:
     def __init__(
@@ -25,18 +33,21 @@ class MqttClient:
         password: str | None = None,
         client_id: str | None = None,
     ) -> None:
-        self.__broker = broker
-        self.__port = port
-        self.__topic = topic
-        self.__client_id = client_id
+        self.set_target(broker, topic, port, username, password)
         if self.__client_id is None:
             self.__client_id = f"python-mqtt-{random.randint(0, 1000)}"
-        self.__username = username
-        self.__password = password
         self.__client: mqtt_client.Client | None = None
         self.__subscribe_callback = subscribe_callback
 
-    def parse_callback(self, client, userdata, msg, callback: Callable):
+    def set_target(self, broker: str, topic:str, port: int, username: str | None = None, password: str | None = None):
+        broker, port = _get_broker_and_port(broker, port)
+        self.__broker = broker
+        self.__port = port
+        self.__topic = topic
+        self.__username = username
+        self.__password = password
+
+    def parse_callback(self, msg, callback: Optional[Callable]):
 
         if callback is None:
             callback = self.__subscribe_callback
@@ -58,8 +69,9 @@ class MqttClient:
 
         if topic is None:
             topic = self.__topic
-        msg = json.dumps(msg)
-        result = self.__client.publish(topic, msg, retain=retain)
+
+        msg_str = json.dumps(msg)
+        result = self.__client.publish(topic, msg_str, retain=retain)
         status = result[0]
         if status != 0:
             raise MqttSendError()
@@ -71,9 +83,7 @@ class MqttClient:
                 raise MqttConnectionError()
 
         self.__client.subscribe(self.__topic)
-        self.__client.on_message = lambda client, userdata, msg: self.parse_callback(
-            client, userdata, msg, callback
-        )
+        self.__client.on_message = lambda _client, _userdata, msg: self.parse_callback(msg, callback)
 
     def connect(self) -> None:
         self.__client = mqtt_client.Client(self.__client_id)
