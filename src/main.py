@@ -1,3 +1,4 @@
+import socket
 from typing import Any, Dict, List, Optional, Tuple, Union
 from pathlib import Path
 
@@ -352,6 +353,18 @@ class ShoppingListApp(MDApp):
                                subscribe_callback=lambda msg_dict, _:shoppingEntryScreen.update_from_mqtt(msg_dict),
                                username=self.settings.mqtt_username,
                                password=self.settings.mqtt_password)
+
+        try:
+            print('getaddrinfo google.com')
+            print(socket.getaddrinfo('google.com', 80))
+        except Exception as e:
+            print(e)
+        try:
+            print(f'getaddrinfo {self.settings.mqtt_server}')
+            print(socket.getaddrinfo(self.settings.mqtt_server, 1883))
+        except Exception as e:
+            print(e)
+
         try:
             self.mqtt.connect()
             self.mqtt.subscribe()
