@@ -1,6 +1,6 @@
 [app]
 
-title = Shooping List App
+title = Shopping List App
 package.name = shoppingapp
 package.domain = gsog.shopping
 

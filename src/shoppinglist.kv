@@ -6,7 +6,6 @@
     ImageLeftWidget:
         MDCheckbox:
             id: shopping_entry_check
-            # bind to property
             active: root.is_checked
             on_active: root.is_checked = self.active
 
@@ -23,11 +22,8 @@
     MDTextField:
         id: shopping_entry_text
         pos_hint: { 'center_y': 0.4 }
-        # SPRACHE
         hint_text: root.get_translated('new_entry')
         text: root.text
-        text_color_normal: "#000000"
-        text_color_focus: "#000000"
         mode: "round"
        
 <ShoppingEntryScreen>:
@@ -38,7 +34,6 @@
         MDTopAppBar:
             title: root.get_translated('app_title')
             md_bg_color: app.theme_cls.primary_color
-            specific_text_color: '#1C2120'
             right_action_items: [['res/settings.png', lambda x: root.navigate_to_settings()]]
 
         ScrollView:
@@ -94,11 +89,8 @@
                 text: root.get_translated('mqtt-server')
             MDTextField:
                 id: mqtt_server_text_field
-                # SPRACHE?
                 hint_text: 'mqtt.server.de'
                 mode: "round"
-                text_color_normal: "#000000"
-                text_color_focus: "#000000"
                 text: app.settings.mqtt_server
                 on_text: root.update_settings()
 
@@ -106,11 +98,8 @@
                 text: root.get_translated('mqtt-topic')
             MDTextField:
                 id: mqtt_topic_text_field
-                # SPRACHE?
                 hint_text: 'topic'
                 mode: "round"
-                text_color_normal: "#000000"
-                text_color_focus: "#000000"
                 text: app.settings.mqtt_topic
                 on_text: root.update_settings()
 
@@ -118,11 +107,8 @@
                 text: root.get_translated('mqtt-username')
             MDTextField:
                 id: mqtt_username_text_field
-                # SPRACHE?
                 hint_text: 'username'
                 mode: "round"
-                text_color_normal: "#000000"
-                text_color_focus: "#000000"
                 text: app.settings.mqtt_username
                 on_text: root.update_settings()
 
@@ -132,7 +118,5 @@
                 id: mqtt_password_text_field
                 password: True
                 mode: "round"
-                text_color_normal: "#000000"
-                text_color_focus: "#000000"
                 text: app.settings.mqtt_password
                 on_text: root.update_settings()

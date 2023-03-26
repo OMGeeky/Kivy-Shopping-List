@@ -8,7 +8,12 @@ from language import TranslationProvider, LANGUAGES
 from mqtt import MqttClient
 
 import kivy.utils
-from kivy.properties import StringProperty, ObjectProperty, BooleanProperty, ListProperty
+from kivy.properties import (
+    StringProperty,
+    ObjectProperty,
+    BooleanProperty,
+    ListProperty,
+)
 from kivy.metrics import dp
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
@@ -44,15 +49,13 @@ class ShoppingEntry(OneLineAvatarIconListItem):
         if self.edit_dialog:
             return
 
-        # SPRACHE
         buttons = [
             MDFlatButton(
-                text=self.get_translated("cancel"),
-                on_release=self.close_edit_popup
+                text=self.get_translated("cancel"), on_release=self.close_edit_popup
             ),
             MDFlatButton(
                 text=self.get_translated("confirm"),
-                on_release=lambda args: self.save_changes(args)
+                on_release=lambda args: self.save_changes(args),
             ),
         ]
 
@@ -109,22 +112,21 @@ class ShoppingEntryScreen(Screen):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        
+
         self.from_mqtt = False
         self.update_from_file()
-        
+
     def update_from_file(self):
         try:
             entries = read_entries_from_files()
         except OSError:
             return
-        
-        self.set_entries(entries['entries'])
+
+        self.set_entries(entries["entries"])
 
     def update_from_mqtt(self, msg_dict):
         self.from_mqtt = True
-        self.entries = msg_dict['entries']
-
+        self.entries = msg_dict["entries"]
 
     def on_bestaetigen(self, *_):
         if self.add_dialog is None:
@@ -180,36 +182,35 @@ class ShoppingEntryScreen(Screen):
             write_entries_to_files(entries_dict)
         except OSError:
             return
-        
+
         # dont push to mqtt if coming from mqtt
         if not self.from_mqtt:
             app.mqtt.publish(entries_dict)
         else:
             self.from_mqtt = False
-    
+
     @mainthread
     def on_entries(self, *_):
         print("on_entries called")
         self.ids["shopping_list"].clear_widgets()
         for entry in self.entries:
-            shopping_entry = ShoppingEntry(text=entry['text'])
-            shopping_entry.is_checked = entry['is_checked'] # type: ignore
+            shopping_entry = ShoppingEntry(text=entry["text"])
+            shopping_entry.is_checked = entry["is_checked"]  # type: ignore
             self.ids["shopping_list"].add_widget(shopping_entry)
 
-        self.export_entries() 
+        self.export_entries()
 
     def get_entires(self):
         entries = []
         for entry in self.ids.shopping_list.children:
             entry_dict = {"is_checked": entry.is_checked, "text": entry.text}
             entries.append(entry_dict)
-        
-        entries.sort(key=lambda entry: (entry['is_checked'], entry['text']))
+
+        entries.sort(key=lambda entry: (entry["is_checked"], entry["text"]))
         return entries
-    
-    def set_entries(self, entries: List[Dict[str, Union[str,bool]]]):
+
+    def set_entries(self, entries: List[Dict[str, Union[str, bool]]]):
         self.entries = entries
-        
 
     def navigate_to_settings(self):
         self.export_entries()
@@ -227,8 +228,8 @@ class SettingsScreen(Screen):
         self.initialized = False
 
         # remember previous mqtt-settings to check if they changed
-        self.previous_mqtt_server   = app.settings.mqtt_server
-        self.previous_mqtt_topic    = app.settings.mqtt_topic
+        self.previous_mqtt_server = app.settings.mqtt_server
+        self.previous_mqtt_topic = app.settings.mqtt_topic
         self.previous_mqtt_password = app.settings.mqtt_password
         self.previous_mqtt_username = app.settings.mqtt_username
 
@@ -251,21 +252,25 @@ class SettingsScreen(Screen):
 
         self.menu.bind()
         # update the current selected from settings
-        self.set_item(app.settings.language) 
+        self.set_item(app.settings.language)
 
         self.initialized = True
 
     def apply_mqtt_settings(self):
-        if self.previous_mqtt_server   != app.settings.mqtt_server   or \
-           self.previous_mqtt_topic    != app.settings.mqtt_topic    or \
-           self.previous_mqtt_password != app.settings.mqtt_password or \
-           self.previous_mqtt_username != app.settings.mqtt_username:
+        if (
+            self.previous_mqtt_server != app.settings.mqtt_server
+            or self.previous_mqtt_topic != app.settings.mqtt_topic
+            or self.previous_mqtt_password != app.settings.mqtt_password
+            or self.previous_mqtt_username != app.settings.mqtt_username
+        ):
             app.mqtt.disconnect()
-            app.mqtt.set_target(app.settings.mqtt_server,
-                                app.settings.mqtt_topic, 
-                                1883,
-                                app.settings.mqtt_username, 
-                                app.settings.mqtt_password)
+            app.mqtt.set_target(
+                app.settings.mqtt_server,
+                app.settings.mqtt_topic,
+                1883,
+                app.settings.mqtt_username,
+                app.settings.mqtt_password,
+            )
             app.mqtt.connect()
 
     def navigate_to_shopping_list(self):
@@ -285,7 +290,7 @@ class SettingsScreen(Screen):
     def get_translated(self, key) -> str:
         language = app.settings.language
         return TranslationProvider.get_translated(key, language)
-    
+
     def update_language(self):
         if not self.initialized:
             return
@@ -298,8 +303,7 @@ class SettingsScreen(Screen):
         if not self.initialized:
             return
         self.update_settings()
-        toast(self.get_translated("change_setting_restart_alert"))
-        # app.update_theme() # TODO (1): eventuell ohne restart
+        app.update_theme()
 
     def update_settings(self):
         if not self.initialized:
@@ -316,9 +320,10 @@ class SettingsScreen(Screen):
 
 class ShoppingListApp(MDApp):
     settings = ObjectProperty(AppSettings(), rebind=True)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.mqtt: MqttClient = None # type: ignore
+        self.mqtt: MqttClient = None  # type: ignore
 
     def build(self):
         self.title = "Shopping List App"
@@ -326,19 +331,18 @@ class ShoppingListApp(MDApp):
         print(self.settings)
         print(self.user_data_dir)
         print(self.directory)
-        
+
         if kivy.utils.platform in ["android", "ios"]:
-            print('android or ios')
-            src_path = Path(self.user_data_dir, 'app')
+            print("android or ios")
+            src_path = Path(self.user_data_dir, "app")
         else:
-            print('not android or ios')
+            print("not android or ios")
             src_path = Path(self.directory)
-            
+
         print(src_path)
         TranslationProvider.src_dir = src_path
-        
+
         # TODO @Tom Theme anpassen
-        self.theme_cls.primary_palette = "Gray"
         self.update_theme()
 
         sm = ScreenManager()
@@ -346,21 +350,25 @@ class ShoppingListApp(MDApp):
         sm.add_widget(shoppingEntryScreen)
         sm.add_widget(SettingsScreen(name="settings"))
 
-        self.mqtt = MqttClient(broker=self.settings.mqtt_server,
-                               port=1883,
-                               topic=self.settings.mqtt_topic,
-                               client_id=None,
-                               subscribe_callback=lambda msg_dict, _:shoppingEntryScreen.update_from_mqtt(msg_dict),
-                               username=self.settings.mqtt_username,
-                               password=self.settings.mqtt_password)
+        self.mqtt = MqttClient(
+            broker=self.settings.mqtt_server,
+            port=1883,
+            topic=self.settings.mqtt_topic,
+            client_id=None,
+            subscribe_callback=lambda msg_dict, _: shoppingEntryScreen.update_from_mqtt(
+                msg_dict
+            ),
+            username=self.settings.mqtt_username,
+            password=self.settings.mqtt_password,
+        )
 
         try:
-            print('getaddrinfo google.com')
-            print(socket.getaddrinfo('google.com', 80))
+            print("getaddrinfo google.com")
+            print(socket.getaddrinfo("google.com", 80))
         except Exception as e:
             print(e)
         try:
-            print(f'getaddrinfo {self.settings.mqtt_server}')
+            print(f"getaddrinfo {self.settings.mqtt_server}")
             print(socket.getaddrinfo(self.settings.mqtt_server, 1883))
         except Exception as e:
             print(e)
@@ -374,6 +382,9 @@ class ShoppingListApp(MDApp):
         return sm
 
     def update_theme(self):
+        self.theme_cls.primary_palette = "Gray"
+        self.theme_cls.accent_palette = "BlueGray"
+
         if self.settings.dark_theme:
             self.theme_cls.theme_style = "Dark"
         else:

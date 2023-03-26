@@ -13,14 +13,16 @@ class MqttSendError(ConnectionError):
     def __init__(self, *args: object) -> None:
         super().__init__("Error sending message to MQTT broker", *args)
 
-def _get_broker_and_port(broker: str, port: int):
-        print('getting broker and port', broker, port)
-              
-        if ':' in broker:
-            broker, port = broker.split(':') # type: ignore
-            port = int(port)
 
-        return broker, port
+def _get_broker_and_port(broker: str, port: int):
+    print("getting broker and port", broker, port)
+
+    if ":" in broker:
+        broker, port = broker.split(":")  # type: ignore
+        port = int(port)
+
+    return broker, port
+
 
 class MqttClient:
     def __init__(
@@ -29,7 +31,7 @@ class MqttClient:
         port: int,
         topic: str,
         subscribe_callback: Callable[[dict, str], None],
-        username: Optional[str]  = None,
+        username: Optional[str] = None,
         password: Optional[str] = None,
         client_id: Optional[str] = None,
     ) -> None:
@@ -39,7 +41,14 @@ class MqttClient:
         self.__client: Optional[mqtt_client.Client] = None
         self.__subscribe_callback = subscribe_callback
 
-    def set_target(self, broker: str, topic:str, port: int, username: Optional[str] = None, password: Optional[str] = None):
+    def set_target(
+        self,
+        broker: str,
+        topic: str,
+        port: int,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+    ):
         broker, port = _get_broker_and_port(broker, port)
         self.__broker = broker
         self.__port = port
@@ -48,7 +57,6 @@ class MqttClient:
         self.__password = password
 
     def parse_callback(self, msg, callback: Optional[Callable]):
-
         if callback is None:
             callback = self.__subscribe_callback
         x = json.loads(msg.payload.decode())
@@ -61,7 +69,9 @@ class MqttClient:
         else:
             print("Failed to connect, return code", rc)
 
-    def publish(self, msg: dict, topic: Optional[str] = None, retain: bool = True) -> None:
+    def publish(
+        self, msg: dict, topic: Optional[str] = None, retain: bool = True
+    ) -> None:
         if self.__client is None:
             self.connect()
             if self.__client is None:
@@ -84,7 +94,9 @@ class MqttClient:
                 raise MqttConnectionError()
 
         self.__client.subscribe(self.__topic)
-        self.__client.on_message = lambda _client, _userdata, msg: self.parse_callback(msg, callback)
+        self.__client.on_message = lambda _client, _userdata, msg: self.parse_callback(
+            msg, callback
+        )
 
     def connect(self) -> None:
         self.__client = mqtt_client.Client(self.__client_id)
@@ -94,8 +106,8 @@ class MqttClient:
 
         self.__client.on_connect = self.on_connect
         print("Connecting to MQTT broker...")
-        print('broker:',self.__broker, 'port:', self.__port)
-        self.__client.connect(host=self.__broker, port= self.__port)
+        print("broker:", self.__broker, "port:", self.__port)
+        self.__client.connect(host=self.__broker, port=self.__port)
         self.__client.loop_start()
 
     def disconnect(self) -> None:
@@ -109,7 +121,6 @@ class MqttClient:
 
 
 def sample2():
-
     broker = "broker.hivemq.com"
     topic = "/gsog/shopping"
     username = None
@@ -118,7 +129,14 @@ def sample2():
     def on_message(msg: dict, topic: str) -> None:
         print(f"Received `{msg}` from `{topic}` topic")
 
-    client = MqttClient(broker=broker, port=1883,topic=topic,subscribe_callback= on_message,username= username,password= password)
+    client = MqttClient(
+        broker=broker,
+        port=1883,
+        topic=topic,
+        subscribe_callback=on_message,
+        username=username,
+        password=password,
+    )
     client.connect()
     count = 0
     while True:
@@ -138,7 +156,7 @@ def sample2():
 
     print("Now subscribing...")
     client.subscribe()
-    
+
     input("Press enter to quit...\n")
 
 
