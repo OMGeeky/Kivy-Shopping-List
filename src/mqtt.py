@@ -91,6 +91,8 @@ class MqttClient:
             self.__client.username_pw_set(self.__username, self.__password)
 
         self.__client.on_connect = self.on_connect
+        print("Connecting to MQTT broker...")
+        print(self.__broker, self.__port)
         self.__client.connect(self.__broker, self.__port)
         self.__client.loop_start()
 
