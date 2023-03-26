@@ -4,10 +4,11 @@ from typing import Dict, Optional
 
 
 LANGUAGES = {"DE": "Deutsch", "EN": "English", "FR": "Francais"}
-LANGUAGE_FOLDER = Path("src","res", "lang")
+LANGUAGE_FOLDER = Path("res", "lang")
 
 
 class TranslationProvider:
+    src_dir : Path 
     last_language_key: Optional[str] = None
     last_language_dict: Optional[Dict[str, str]] = None
 
@@ -19,7 +20,8 @@ class TranslationProvider:
         if cls.last_language_key == language and cls.last_language_dict is not None:
             return cls.last_language_dict
 
-        path = Path(LANGUAGE_FOLDER, f"{language}.json")
+        path = Path(cls.src_dir, LANGUAGE_FOLDER, f"{language}.json")
+        print(f"loading language file: {path}")
         try:
             with open(path, "r", encoding="utf-8") as f:
                 result = json.load(f)
@@ -29,7 +31,7 @@ class TranslationProvider:
 
         except FileNotFoundError:
             print(f'Language not found: "{language}"')
-            raise
+            return {}
 
     @classmethod
     def get_translated(cls, key: str, language: str) -> str:
