@@ -327,9 +327,14 @@ class ShoppingListApp(MDApp):
         print(self.directory)
         
         if kivy.utils.platform in ["android", "ios"]:
-            TranslationProvider.src_dir = Path(self.user_data_dir, 'app')
+            print('android or ios')
+            src_path = Path(self.user_data_dir, 'app')
         else:
-            TranslationProvider.src_dir = Path(self.directory)
+            print('not android or ios')
+            src_path = Path(self.directory)
+            
+        print(src_path)
+        TranslationProvider.src_dir = src_path
         
         # TODO @Tom Theme anpassen
         self.theme_cls.primary_palette = "Gray"
