@@ -51,7 +51,7 @@ class ShoppingEntry(OneLineAvatarIconListItem):
 
         list = self.get_shopping_list()
         if list:
-            list.update_entry(self)
+            list.save_entries()
 
     # endregion
     def get_shopping_list(self):
@@ -106,7 +106,7 @@ class ShoppingEntry(OneLineAvatarIconListItem):
         self.edit_dialog.dismiss()
         list = self.get_shopping_list()
         if list:
-            list.update_entry(self)
+            list.save_entries()
 
     def get_translated(self, key: str) -> str:
         settings = AppSettings.get_or_create()
@@ -156,6 +156,7 @@ class ShoppingEntryScreen(Screen):
             return
 
         self.add_shopping_entry(text)
+        self.add_dialog.dismiss()
 
     def on_entries(self, *_):
         print("on_entries called", self)
@@ -172,6 +173,7 @@ class ShoppingEntryScreen(Screen):
     # region update entries
 
     def update_from_file(self):
+        """Liest die liste aus der JSON-Datei"""
         try:
             entries = read_entries_from_files()
         except OSError:
@@ -180,18 +182,20 @@ class ShoppingEntryScreen(Screen):
         self.set_entries(entries["entries"])
 
     def update_from_mqtt(self, msg_dict):
+        """
+        Wird durch MQTT-Subscribe aufgerufen, wenn sich die Liste ändert.
+
+        Aktualisiert die Liste mit den neuen Einträgen
+        """
         self.from_mqtt = True
         self.set_entries(msg_dict["entries"], from_mqtt=True)
-
-    def update_entry(self, entry: ShoppingEntry):
-        print("update entry called", entry)
-        self.export_entries()
 
     # endregion
 
     # region add entry
 
     def open_add_popup(self):
+        """Öffnet das Popup zum hinzufügen eines Eintrags"""
         if self.add_dialog:
             return
 
@@ -200,7 +204,7 @@ class ShoppingEntryScreen(Screen):
         buttons = [
             MDFlatButton(
                 text=TranslationProvider.get_translated("cancel", language),
-                on_release=self.close_add_popup,
+                on_release=lambda _: self.add_dialog.dismiss(),  # type: ignore
             ),
             MDFlatButton(
                 text=TranslationProvider.get_translated("confirm", language),
@@ -213,21 +217,19 @@ class ShoppingEntryScreen(Screen):
             content_cls=AddDialog(),
             buttons=buttons,
         )
-
+        self.add_dialog.on_dismiss = lambda: self.close_add_popup()
         self.add_dialog.open()
 
-    def close_add_popup(self, *_):
+    def close_add_popup(self):
         if not self.add_dialog:
             return
 
-        self.add_dialog.dismiss()
         self.add_dialog = None
 
     def add_shopping_entry(self, text):
         entry = ShoppingEntry(text=text)
         self.ids["shopping_list"].add_widget(entry)
-        self.update_entry(entry)
-        self.close_add_popup()
+        self.save_entries()
 
     # endregion
 
@@ -244,26 +246,31 @@ class ShoppingEntryScreen(Screen):
         print("remove_entry called", entry)
         self.ids.shopping_list.remove_widget(entry)
 
-    def export_entries(self, from_mqtt=False):
+    def save_entries(self, entries: Optional[list] = None, from_mqtt=False):
         """
-        Speichert die einträge in einer JSON datei und wenn "from_mqtt" == False ist 
-        sendet es die daten an MQTT zur synchronisation
+        Speichert die Einträge in einer JSON datei und wenn "from_mqtt" == False ist 
+        sendet es die Einträge auch an MQTT zur synchronisation
 
         :param from_mqtt: ob der aufruf von MQTT kommt und nicht auf MQTT zurück geschrieben werden soll
         """
         if not self.initialized:
             return
 
-        print("exporting entries", from_mqtt)
-        self.entries = self.get_entires()
+        print(f"saving entries (from mqtt: {from_mqtt})", self, entries)
+        if entries is None:
+            entries = self.get_entires()
+
+        self.entries = entries
         entries_dict = {"entries": self.sort(self.entries, False)}
         try:
+            print("writing entries to file", self)
             write_entries_to_files(entries_dict)
         except OSError:
             return
 
         # dont push to mqtt if coming from mqtt
         if not from_mqtt:
+            print('publishing entries to mqtt', self)
             app.mqtt.publish(entries_dict)
 
     def get_entires(self):
@@ -286,8 +293,8 @@ class ShoppingEntryScreen(Screen):
         :param entries: die neuen einträge
         :param from_mqtt: ob der aufruf von MQTT kommt und nicht auf MQTT zurück geschrieben werden soll
         """
-        self.entries = entries
-        self.export_entries(from_mqtt=from_mqtt)
+        print("set_entries called", entries, self)
+        self.save_entries(entries, from_mqtt=from_mqtt)
 
     # endregion
 
@@ -298,7 +305,7 @@ class ShoppingEntryScreen(Screen):
 
     def navigate_to_settings(self):
         """Navigiert zur Einstellungs-Seite"""
-        self.export_entries()
+        self.save_entries()
         self.manager.transition.direction = "left"
         self.manager.current = "settings"
 
@@ -462,12 +469,8 @@ class ShoppingListApp(MDApp):
         except Exception as e:
             print(e)
 
-        try:
-            self.mqtt.connect()
-            self.mqtt.subscribe()
-        except Exception as e:
-            print(e)
-            toast("MQTT-Connection failed")
+        self.mqtt.connect()
+        self.mqtt.subscribe()
         return sm
 
     def update_theme(self):

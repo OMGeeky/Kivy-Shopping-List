@@ -1,8 +1,9 @@
 import random
-from typing import Callable, Optional, Tuple
+from typing import Any, Callable, Optional
 from paho.mqtt import client as mqtt_client
 import json
 
+from kivymd.toast import toast
 
 class MqttConnectionError(ConnectionError):
     def __init__(self, *args: object) -> None:
@@ -35,6 +36,7 @@ class MqttClient:
         password: Optional[str] = None,
         client_id: Optional[str] = None,
     ) -> None:
+        self.__connection_error = False
         self.set_target(broker, topic, port, username, password)
         if client_id is None:
             self.__client_id = f"python-mqtt-{random.randint(0, 1000)}"
@@ -63,19 +65,18 @@ class MqttClient:
         callback(x, msg.topic)
 
     @staticmethod
-    def on_connect(_client, _userdata, _flags, rc) -> None:
-        if rc == 0:
+    def on_connect(_client: mqtt_client.Client, _userdata: Any, _flags: dict, return_code: int) -> None:
+        if return_code == 0:
             print("Connected to MQTT Broker!")
         else:
-            print("Failed to connect, return code", rc)
+            print("Failed to connect, return code", return_code)
 
     def publish(
         self, msg: dict, topic: Optional[str] = None, retain: bool = True
     ) -> None:
         if self.__client is None:
-            self.connect()
-            if self.__client is None:
-                raise MqttConnectionError()
+            print("publish called but mqtt-client is None", self)
+            return
 
         if topic is None:
             topic = self.__topic
@@ -84,15 +85,17 @@ class MqttClient:
         result = self.__client.publish(topic, msg_str, retain=retain)
         status = result[0]
         if status != 0:
-            print("Failed to send message to MQTT broker")
-            # raise MqttSendError()
+            print("Failed to send message to MQTT broker", status, self)
+            toast("Failed to send message to MQTT broker")
 
     def subscribe(self, callback=None) -> None:
+        if self.__connection_error:
+            return
+        
         if self.__client is None:
-            self.connect()
-            if self.__client is None:
-                raise MqttConnectionError()
-
+            print("subscribe called but mqtt-client is None", self)
+            return
+        
         self.__client.subscribe(self.__topic)
         self.__client.on_message = lambda _client, _userdata, msg: self.parse_callback(
             msg, callback
@@ -107,58 +110,20 @@ class MqttClient:
         self.__client.on_connect = self.on_connect
         print("Connecting to MQTT broker...")
         print("broker:", self.__broker, "port:", self.__port)
-        self.__client.connect(host=self.__broker, port=self.__port)
-        self.__client.loop_start()
+        try:
+            self.__client.connect(host=self.__broker, port=self.__port)
+            self.__client.loop_start()
+            self.__connection_error = False
+        except Exception as e:
+            self.__connection_error = True
+            print("Failed to connect to MQTT broker", e)
+            toast("Failed to connect to MQTT broker")
 
     def disconnect(self) -> None:
-        if self.__client:
+        if self.__client and self.__connection_error == False:
             print("Disconnecting from MQTT broker...")
             self.__client.loop_stop()
             self.__client.disconnect()
 
     def __del__(self) -> None:
         self.disconnect()
-
-
-def sample2():
-    broker = "broker.hivemq.com"
-    topic = "/gsog/shopping"
-    username = None
-    password = None
-
-    def on_message(msg: dict, topic: str) -> None:
-        print(f"Received `{msg}` from `{topic}` topic")
-
-    client = MqttClient(
-        broker=broker,
-        port=1883,
-        topic=topic,
-        subscribe_callback=on_message,
-        username=username,
-        password=password,
-    )
-    client.connect()
-    count = 0
-    while True:
-        text = input("Press enter to send a message... (q to quit)")
-        if text == "q":
-            break
-
-        count += 1
-        msg_dict = {
-            "dummy": "Hello there",
-            "message": text,
-            "counter": count,
-        }
-        # msg = json.dumps(msg_dict, indent=4)
-        msg = msg_dict
-        client.publish(msg)
-
-    print("Now subscribing...")
-    client.subscribe()
-
-    input("Press enter to quit...\n")
-
-
-if __name__ == "__main__":
-    sample2()
