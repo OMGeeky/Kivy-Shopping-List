@@ -221,7 +221,9 @@ class ShoppingEntryScreen(Screen):
         self.add_dialog = None
 
     def add_shopping_entry(self, text):
-        self.ids["shopping_list"].add_widget(ShoppingEntry(text=text))
+        entry = ShoppingEntry(text=text)
+        self.ids["shopping_list"].add_widget(entry)
+        self.update_entry(entry)
         self.close_add_popup()
     
     # endregion
