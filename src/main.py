@@ -158,13 +158,11 @@ class ShoppingEntryScreen(Screen):
         self.add_shopping_entry(text)
         self.add_dialog.dismiss()
 
-    def on_entries(self, *_):
-        print("on_entries called", self)
-        self.set_entries_widgets()
-
     def on_sort_reverse(self, *_):
         print("on_sort_reverse", self.sort_reverse)
-        self.entries = self.get_entires()
+        entries = self.get_entires()
+        self.entries = self.sort(entries, self.sort_reverse)
+        self.set_entries_widgets()
 
     # endregion
 
@@ -263,7 +261,8 @@ class ShoppingEntryScreen(Screen):
         if entries is None:
             entries = self.get_entires()
 
-        self.entries = entries
+        self.entries = self.sort(entries, self.sort_reverse)
+        self.set_entries_widgets()
         entries_dict = {"entries": self.sort(self.entries, False)}
         try:
             print("writing entries to file", self)
@@ -282,7 +281,6 @@ class ShoppingEntryScreen(Screen):
             entry_dict = {"is_checked": entry.is_checked, "text": entry.text}
             entries.append(entry_dict)
 
-        entries = self.sort(entries, self.sort_reverse)
         return entries
 
     @staticmethod
