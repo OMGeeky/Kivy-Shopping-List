@@ -1,21 +1,18 @@
 import random
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
+from kivymd.toast import toast
 from paho.mqtt import client as mqtt_client
 import json
 
-from kivymd.toast import toast
+def _get_broker_and_port(broker: str, port: int) -> tuple[str, int]:
+    """
+    Teilt die Broker-Adresse in Broker und Port auf.
 
-class MqttConnectionError(ConnectionError):
-    def __init__(self, *args: object) -> None:
-        super().__init__("Connection error with the MQTT broker", *args)
-
-
-class MqttSendError(ConnectionError):
-    def __init__(self, *args: object) -> None:
-        super().__init__("Error sending message to MQTT broker", *args)
-
-
-def _get_broker_and_port(broker: str, port: int):
+    Wenn der Port in der Broker-Adresse angegeben ist, wird er aus der Broker-Adresse entfernt und der Port-Parameter ignoriert.
+    :param broker: der hostname oder die IP-Adresse des Brokers (kann auch Port enthalten)
+    :param port: der Port der verwendet wird, wenn der Port nicht in der Broker-Adresse angegeben ist
+    :return: (broker, port) als Tuple
+    """
     print("getting broker and port", broker, port)
 
     if ":" in broker:
@@ -26,6 +23,9 @@ def _get_broker_and_port(broker: str, port: int):
 
 
 class MqttClient:
+    """
+    Klasse zum Verbinden mit einem MQTT-Broker
+    """
     def __init__(
         self,
         broker: str,
@@ -51,6 +51,15 @@ class MqttClient:
         username: Optional[str] = None,
         password: Optional[str] = None,
     ):
+        """
+        Setzt die Verbindungsdaten für den MQTT-Broker
+
+        :param broker: die Adresse des Brokers
+        :param topic: die topic die der Client standardmäßig verwendet
+        :param port: Port des Brokers, kann auch durch : in der Broker-Adresse angegeben werden
+        :param username: Username zum Verbinden mit dem Broker
+        :param password: passwort zum Verbinden mit dem Broker
+        """
         broker, port = _get_broker_and_port(broker, port)
         self.__broker = broker
         self.__port = port
@@ -59,13 +68,24 @@ class MqttClient:
         self.__password = password
 
     def parse_callback(self, msg, callback: Optional[Callable]):
+        """
+        Verarbeitet die empfangenen Nachrichten und ruft die angegebene Callback-Funktion auf
+        :param msg: die nachricht die empfangen wurde
+        :param callback: [optional] die Callback-Funktion die aufgerufen werden soll (wenn nicht angegeben wird die Callback-Funktion der Klasse verwendet)
+        """
         if callback is None:
             callback = self.__subscribe_callback
         x = json.loads(msg.payload.decode())
         callback(x, msg.topic)
 
     @staticmethod
-    def on_connect(_client: mqtt_client.Client, _userdata: Any, _flags: dict, return_code: int) -> None:
+    def on_connect(return_code: int) -> None:
+        """
+        Wird aufgerufen, wenn eine Verbindung zum MQTT-Broker hergestellt wurde.
+
+        Macht selbst nicht viel, außer eine Meldung auszugeben.
+        :param return_code: anhand dessen wird entschieden ob die Verbindung erfolgreich war
+        """
         if return_code == 0:
             print("Connected to MQTT Broker!")
         else:
@@ -74,6 +94,12 @@ class MqttClient:
     def publish(
         self, msg: dict, topic: Optional[str] = None, retain: bool = True
     ) -> None:
+        """
+        Sendet eine Nachricht an den MQTT-Broker
+        :param msg: die zu sendenden Daten als dict (wird automatisch in JSON umgewandelt)
+        :param topic: [optional] die topic an welche die Nachricht gesendet werden soll (wenn nicht angegeben wird die topic der Klasse verwendet)
+        :param retain: ob bei der Nachricht die retain-Flag gesetzt werden soll
+        """
         if self.__client is None:
             print("publish called but mqtt-client is None", self)
             return
@@ -89,25 +115,32 @@ class MqttClient:
             toast("Failed to send message to MQTT broker")
 
     def subscribe(self, callback=None) -> None:
+        """
+        Abonniert die topic der Klasse und ruft die angegebene Callback-Funktion auf, wenn eine Nachricht empfangen wird
+        :param callback: die Callback-Funktion die aufgerufen werden soll (wenn nicht angegeben wird die Callback-Funktion der Klasse verwendet)
+        """
         if self.__connection_error:
             return
-        
+
         if self.__client is None:
             print("subscribe called but mqtt-client is None", self)
             return
-        
+
         self.__client.subscribe(self.__topic)
         self.__client.on_message = lambda _client, _userdata, msg: self.parse_callback(
             msg, callback
         )
 
     def connect(self) -> None:
+        """
+        Verbindet mit dem MQTT-Broker
+        """
         self.__client = mqtt_client.Client(self.__client_id)
         if self.__username:
             print("setting username and password")
             self.__client.username_pw_set(self.__username, self.__password)
 
-        self.__client.on_connect = self.on_connect
+        self.__client.on_connect = lambda _client, _userdata, _flags, return_code: MqttClient.on_connect(return_code)
         print("Connecting to MQTT broker...")
         print("broker:", self.__broker, "port:", self.__port)
         try:
@@ -120,7 +153,12 @@ class MqttClient:
             toast("Failed to connect to MQTT broker")
 
     def disconnect(self) -> None:
-        if self.__client and self.__connection_error == False:
+        """
+        Trennt die Verbindung zum MQTT-Broker.
+
+        Muss nicht explizit aufgerufen werden, da die Klasse sich selbst beim Löschen automatisch trennt
+        """
+        if self.__client and self.__connection_error is False:
             print("Disconnecting from MQTT broker...")
             self.__client.loop_stop()
             self.__client.disconnect()
