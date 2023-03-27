@@ -160,7 +160,7 @@ class ShoppingEntryScreen(Screen):
 
     def on_sort_reverse(self, *_):
         print("on_sort_reverse", self.sort_reverse)
-        entries = self.get_entires()
+        entries = self.get_entries()
         self.entries = self.sort(entries, self.sort_reverse)
         self.set_entries_widgets()
 
@@ -259,7 +259,7 @@ class ShoppingEntryScreen(Screen):
 
         print(f"saving entries (from mqtt: {from_mqtt})", self, entries)
         if entries is None:
-            entries = self.get_entires()
+            entries = self.get_entries()
 
         self.entries = self.sort(entries, self.sort_reverse)
         self.set_entries_widgets()
@@ -275,7 +275,7 @@ class ShoppingEntryScreen(Screen):
             print('publishing entries to mqtt', self)
             app.mqtt.publish(entries_dict)
 
-    def get_entires(self):
+    def get_entries(self):
         entries = []
         for entry in self.ids.shopping_list.children:
             entry_dict = {"is_checked": entry.is_checked, "text": entry.text}
