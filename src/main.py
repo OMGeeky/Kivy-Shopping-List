@@ -42,7 +42,7 @@ class ShoppingEntry(OneLineAvatarIconListItem):
     def on_is_checked(self, *_):
         if not self.initialized:
             return
-        print('on_is_checked')
+
         list = self.get_shopping_list()
         if list:
             list.update_entry(self)
@@ -69,11 +69,11 @@ class ShoppingEntry(OneLineAvatarIconListItem):
         buttons = [
             MDFlatButton(
                 text=self.get_translated("cancel"),
-                on_release=self.close_edit_popup
+                on_release=lambda _: self.edit_dialog.dismiss() # type: ignore
             ),
             MDFlatButton(
                 text=self.get_translated("confirm"),
-                on_release=lambda args: self.save_changes(args)
+                on_release=lambda _: self.save_changes()
             ),
         ]
 
@@ -83,10 +83,10 @@ class ShoppingEntry(OneLineAvatarIconListItem):
             content_cls=AddDialog(self.text),
             buttons=buttons,
         )
-
+        self.edit_dialog.on_dismiss = lambda: self.close_edit_popup()
         self.edit_dialog.open()
 
-    def save_changes(self, *_):
+    def save_changes(self):
         if self.edit_dialog is None:
             return
 
@@ -97,7 +97,7 @@ class ShoppingEntry(OneLineAvatarIconListItem):
 
         self.text = changed_text
 
-        self.close_edit_popup()
+        self.edit_dialog.dismiss()
         list = self.get_shopping_list()
         if list:
             list.update_entry(self)
@@ -106,12 +106,10 @@ class ShoppingEntry(OneLineAvatarIconListItem):
         settings = AppSettings.get_or_create()
         return TranslationProvider.get_translated(key, settings.language)
 
-    # *args bzw. *_ ist noetig, da weitere Parameter mitgegeben werden, die aber nicht genutzt werden
-    def close_edit_popup(self, *_):
+    def close_edit_popup(self):
         if not self.edit_dialog:
             return
 
-        self.edit_dialog.dismiss()
         self.edit_dialog = None
 
     def __str__(self) -> str:
@@ -133,6 +131,7 @@ class AddDialog(MDBoxLayout):
 class ShoppingEntryScreen(Screen):
     add_dialog = None
     entries = ListProperty([])
+    sort_reverse = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -153,14 +152,14 @@ class ShoppingEntryScreen(Screen):
 
         self.add_shopping_entry(text)
 
-    @mainthread
     def on_entries(self, *_):
-        print("on_entries called")
-        self.ids["shopping_list"].clear_widgets()
-        for entry in self.entries:
-            shopping_entry = ShoppingEntry(text=entry['text'])
-            shopping_entry.is_checked = entry['is_checked']  # type: ignore
-            self.ids["shopping_list"].add_widget(shopping_entry)
+        print("on_entries called", self)
+        self.set_entries_widgets()
+
+    def on_sort_reverse(self, *_):
+        print('on_sort_reverse', self.sort_reverse)
+        self.entries = self.get_entires()
+        # self.set_entries_widgets()
 
     # endregion
 
@@ -228,6 +227,15 @@ class ShoppingEntryScreen(Screen):
     
     # endregion
 
+    @mainthread
+    def set_entries_widgets(self):
+        print('set_entries_widgets', self)
+        self.ids["shopping_list"].clear_widgets()
+        for entry in self.entries:
+            shopping_entry = ShoppingEntry(text=entry['text'])
+            shopping_entry.is_checked = entry['is_checked']  # type: ignore
+            self.ids["shopping_list"].add_widget(shopping_entry)
+
     def delete_entry(self, entry: ShoppingEntry):
         print('remove_entry called', entry)
         self.ids.shopping_list.remove_widget(entry)
@@ -241,9 +249,10 @@ class ShoppingEntryScreen(Screen):
         """
         if not self.initialized:
             return
+
         print('exporting entries', from_mqtt)
-        entries = self.get_entires()
-        entries_dict = {"entries": entries}
+        self.entries = self.get_entires()
+        entries_dict = {"entries": self.sort(self.entries, False)}
         try:
             write_entries_to_files(entries_dict)
         except OSError:
@@ -259,8 +268,12 @@ class ShoppingEntryScreen(Screen):
             entry_dict = {"is_checked": entry.is_checked, "text": entry.text}
             entries.append(entry_dict)
 
-        entries.sort(key=lambda entry: (entry['is_checked'], entry['text']))
+        entries = self.sort(entries, self.sort_reverse)
         return entries
+
+    @staticmethod
+    def sort(entries, reverse)-> list:
+        return sorted(entries,key=lambda entry: (entry['is_checked'], entry['text']), reverse=reverse)
 
     def set_entries(self, entries: List[Dict[str, Union[str, bool]]], from_mqtt=False):
         """
@@ -275,6 +288,9 @@ class ShoppingEntryScreen(Screen):
     # endregion
 
     # region general
+
+    def toggle_sort(self):
+        self.sort_reverse = not self.sort_reverse
     
     def navigate_to_settings(self):
         """Navigiert zur Einstellungs-Seite"""
