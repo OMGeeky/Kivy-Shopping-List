@@ -34,7 +34,7 @@
         MDTopAppBar:
             title: root.get_translated('app_title')
             md_bg_color: app.theme_cls.primary_color
-            right_action_items: [['res/settings.png', lambda x: root.navigate_to_settings()]]
+            right_action_items: [['sort-variant', lambda x: root.toggle_sort()],['cog', lambda x: root.navigate_to_settings()]]
 
         ScrollView:
             size_hint: 0.85, 0.85
@@ -56,7 +56,7 @@
         MDTopAppBar:
             title: root.get_translated('settings')
             md_bg_color: app.theme_cls.primary_color
-            left_action_items: [['res/arrow_back.png', lambda x: root.navigate_to_shopping_list()]]
+            left_action_items: [['arrow-left', lambda x: root.navigate_to_shopping_list()]]
 
         MDGridLayout:
             pos_hint: { 'center_x': 0.5 }

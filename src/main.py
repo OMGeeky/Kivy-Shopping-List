@@ -38,12 +38,34 @@ class ShoppingEntry(OneLineAvatarIconListItem):
 
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
-
+        self.initialized = False
         self.text = text
         self.is_checked = False
+        self.initialized = True
+
+    # region events
+
+    def on_is_checked(self, *_):
+        if not self.initialized:
+            return
+
+        list = self.get_shopping_list()
+        if list:
+            list.update_entry(self)
+
+    # endregion
+    def get_shopping_list(self):
+        if not self.initialized:
+            return None
+        if self.parent:
+            return self.parent.parent.parent.parent
+
+        return None
 
     def delete(self, shopping_entry):
-        self.parent.remove_widget(shopping_entry)
+        list = self.get_shopping_list()
+        if list:
+            list.delete_entry(shopping_entry)
 
     def edit_popup(self):
         if self.edit_dialog:
@@ -51,11 +73,12 @@ class ShoppingEntry(OneLineAvatarIconListItem):
 
         buttons = [
             MDFlatButton(
-                text=self.get_translated("cancel"), on_release=self.close_edit_popup
+                text=self.get_translated("cancel"),
+                on_release=lambda _: self.edit_dialog.dismiss()  # type: ignore
             ),
             MDFlatButton(
                 text=self.get_translated("confirm"),
-                on_release=lambda args: self.save_changes(args),
+                on_release=lambda _: self.save_changes(),
             ),
         ]
 
@@ -66,9 +89,10 @@ class ShoppingEntry(OneLineAvatarIconListItem):
             buttons=buttons,
         )
 
+        self.edit_dialog.on_dismiss = lambda: self.close_edit_popup()
         self.edit_dialog.open()
 
-    def save_changes(self, *_):
+    def save_changes(self):
         if self.edit_dialog is None:
             return
 
@@ -79,20 +103,23 @@ class ShoppingEntry(OneLineAvatarIconListItem):
 
         self.text = changed_text
 
-        self.close_edit_popup()
+        self.edit_dialog.dismiss()
+        list = self.get_shopping_list()
+        if list:
+            list.update_entry(self)
 
     def get_translated(self, key: str) -> str:
         settings = AppSettings.get_or_create()
         return TranslationProvider.get_translated(key, settings.language)
 
-    # *args bzw. *_ ist noetig, da weitere Parameter mitgegeben werden, die aber nicht genutzt werden
-    def close_edit_popup(self, *_):
+    def close_edit_popup(self):
         if not self.edit_dialog:
             return
 
-        self.edit_dialog.dismiss()
         self.edit_dialog = None
 
+    def __str__(self) -> str:
+        return super().__str__() + f"is_checked: {self.is_checked} text: {self.text}"
 
 class AddDialog(MDBoxLayout):
     text = StringProperty("")
@@ -109,24 +136,15 @@ class AddDialog(MDBoxLayout):
 class ShoppingEntryScreen(Screen):
     add_dialog = None
     entries = ListProperty([])
+    sort_reverse = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self.from_mqtt = False
+        self.initialized = False
         self.update_from_file()
+        self.initialized = True
 
-    def update_from_file(self):
-        try:
-            entries = read_entries_from_files()
-        except OSError:
-            return
-
-        self.set_entries(entries["entries"])
-
-    def update_from_mqtt(self, msg_dict):
-        self.from_mqtt = True
-        self.entries = msg_dict["entries"]
+    # region events
 
     def on_bestaetigen(self, *_):
         if self.add_dialog is None:
@@ -138,6 +156,40 @@ class ShoppingEntryScreen(Screen):
             return
 
         self.add_shopping_entry(text)
+
+    def on_entries(self, *_):
+        print("on_entries called", self)
+        self.set_entries_widgets()
+
+    def on_sort_reverse(self, *_):
+        print("on_sort_reverse", self.sort_reverse)
+        self.entries = self.get_entires()
+
+    # endregion
+
+    # region entries
+
+    # region update entries
+
+    def update_from_file(self):
+        try:
+            entries = read_entries_from_files()
+        except OSError:
+            return
+
+        self.set_entries(entries["entries"])
+
+    def update_from_mqtt(self, msg_dict):
+        self.from_mqtt = True
+        self.set_entries(msg_dict["entries"], from_mqtt=True)
+
+    def update_entry(self, entry: ShoppingEntry):
+        print("update entry called", entry)
+        self.export_entries()
+
+    # endregion
+
+    # region add entry
 
     def open_add_popup(self):
         if self.add_dialog:
@@ -172,33 +224,47 @@ class ShoppingEntryScreen(Screen):
         self.add_dialog = None
 
     def add_shopping_entry(self, text):
-        self.ids["shopping_list"].add_widget(ShoppingEntry(text=text))
+        entry = ShoppingEntry(text=text)
+        self.ids["shopping_list"].add_widget(entry)
+        self.update_entry(entry)
         self.close_add_popup()
 
-    def export_entries(self):
-        entries = self.get_entires()
-        entries_dict = {"entries": entries}
-        try:
-            write_entries_to_files(entries_dict)
-        except OSError:
-            return
-
-        # dont push to mqtt if coming from mqtt
-        if not self.from_mqtt:
-            app.mqtt.publish(entries_dict)
-        else:
-            self.from_mqtt = False
+    # endregion
 
     @mainthread
-    def on_entries(self, *_):
-        print("on_entries called")
+    def set_entries_widgets(self):
+        print("set_entries_widgets", self)
         self.ids["shopping_list"].clear_widgets()
         for entry in self.entries:
             shopping_entry = ShoppingEntry(text=entry["text"])
             shopping_entry.is_checked = entry["is_checked"]  # type: ignore
             self.ids["shopping_list"].add_widget(shopping_entry)
 
-        self.export_entries()
+    def delete_entry(self, entry: ShoppingEntry):
+        print("remove_entry called", entry)
+        self.ids.shopping_list.remove_widget(entry)
+
+    def export_entries(self, from_mqtt=False):
+        """
+        Speichert die einträge in einer JSON datei und wenn "from_mqtt" == False ist 
+        sendet es die daten an MQTT zur synchronisation
+
+        :param from_mqtt: ob der aufruf von MQTT kommt und nicht auf MQTT zurück geschrieben werden soll
+        """
+        if not self.initialized:
+            return
+
+        print("exporting entries", from_mqtt)
+        self.entries = self.get_entires()
+        entries_dict = {"entries": self.sort(self.entries, False)}
+        try:
+            write_entries_to_files(entries_dict)
+        except OSError:
+            return
+
+        # dont push to mqtt if coming from mqtt
+        if not from_mqtt:
+            app.mqtt.publish(entries_dict)
 
     def get_entires(self):
         entries = []
@@ -206,13 +272,32 @@ class ShoppingEntryScreen(Screen):
             entry_dict = {"is_checked": entry.is_checked, "text": entry.text}
             entries.append(entry_dict)
 
-        entries.sort(key=lambda entry: (entry["is_checked"], entry["text"]))
+        entries = self.sort(entries, self.sort_reverse)
         return entries
 
-    def set_entries(self, entries: List[Dict[str, Union[str, bool]]]):
+    @staticmethod
+    def sort(entries, reverse) -> list:
+        return sorted(entries, key=lambda entry: (entry["is_checked"], entry["text"]), reverse=reverse)
+
+    def set_entries(self, entries: List[Dict[str, Union[str, bool]]], from_mqtt=False):
+        """
+        Setzt die werte der liste auf die mitgegebenen einträge und speichert diese
+
+        :param entries: die neuen einträge
+        :param from_mqtt: ob der aufruf von MQTT kommt und nicht auf MQTT zurück geschrieben werden soll
+        """
         self.entries = entries
+        self.export_entries(from_mqtt=from_mqtt)
+
+    # endregion
+
+    # region general
+
+    def toggle_sort(self):
+        self.sort_reverse = not self.sort_reverse
 
     def navigate_to_settings(self):
+        """Navigiert zur Einstellungs-Seite"""
         self.export_entries()
         self.manager.transition.direction = "left"
         self.manager.current = "settings"
@@ -221,6 +306,10 @@ class ShoppingEntryScreen(Screen):
         language = app.settings.language
         return TranslationProvider.get_translated(key, language)
 
+    def __str__(self) -> str:
+        return super().__str__() + f"count: {len(self.entries)}"
+
+    # endregion
 
 class SettingsScreen(Screen):
     def __init__(self, **kwargs):
