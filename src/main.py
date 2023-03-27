@@ -158,13 +158,11 @@ class ShoppingEntryScreen(Screen):
         self.add_shopping_entry(text)
         self.add_dialog.dismiss()
 
-    def on_entries(self, *_):
-        print("on_entries called", self)
-        self.set_entries_widgets()
-
     def on_sort_reverse(self, *_):
         print("on_sort_reverse", self.sort_reverse)
-        self.entries = self.get_entires()
+        entries = self.get_entires()
+        self.entries = self.sort(entries, self.sort_reverse)
+        self.set_entries_widgets()
 
     # endregion
 
@@ -245,13 +243,16 @@ class ShoppingEntryScreen(Screen):
     def delete_entry(self, entry: ShoppingEntry):
         print("remove_entry called", entry)
         self.ids.shopping_list.remove_widget(entry)
+        self.save_entries()
 
     def save_entries(self, entries: Optional[list] = None, from_mqtt=False):
         """
-        Speichert die Einträge in einer JSON datei und wenn "from_mqtt" == False ist 
+        Speichert die Einträge in einer JSON datei und wenn ``"from_mqtt" == False`` ist,
         sendet es die Einträge auch an MQTT zur synchronisation
 
-        :param from_mqtt: ob der aufruf von MQTT kommt und nicht auf MQTT zurück geschrieben werden soll
+        :param entries: die einträge die gespeichert werden sollen, wenn None werden die einträge von ``self.get_entires()`` genommen
+        :param from_mqtt: ob der aufruf von MQTT kommt und nicht auf MQTT zurückgeschrieben
+        werden soll
         """
         if not self.initialized:
             return
@@ -260,7 +261,8 @@ class ShoppingEntryScreen(Screen):
         if entries is None:
             entries = self.get_entires()
 
-        self.entries = entries
+        self.entries = self.sort(entries, self.sort_reverse)
+        self.set_entries_widgets()
         entries_dict = {"entries": self.sort(self.entries, False)}
         try:
             print("writing entries to file", self)
@@ -279,7 +281,6 @@ class ShoppingEntryScreen(Screen):
             entry_dict = {"is_checked": entry.is_checked, "text": entry.text}
             entries.append(entry_dict)
 
-        entries = self.sort(entries, self.sort_reverse)
         return entries
 
     @staticmethod
