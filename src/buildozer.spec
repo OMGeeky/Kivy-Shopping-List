@@ -4,6 +4,9 @@ title = Shopping List App
 package.name = shoppingapp
 package.domain = gsog.shopping
 
+icon.filename = res/Kivy_logo_green.png
+    
+
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 
