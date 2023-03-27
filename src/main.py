@@ -245,13 +245,16 @@ class ShoppingEntryScreen(Screen):
     def delete_entry(self, entry: ShoppingEntry):
         print("remove_entry called", entry)
         self.ids.shopping_list.remove_widget(entry)
+        self.save_entries()
 
     def save_entries(self, entries: Optional[list] = None, from_mqtt=False):
         """
-        Speichert die Einträge in einer JSON datei und wenn "from_mqtt" == False ist 
+        Speichert die Einträge in einer JSON datei und wenn ``"from_mqtt" == False`` ist,
         sendet es die Einträge auch an MQTT zur synchronisation
 
-        :param from_mqtt: ob der aufruf von MQTT kommt und nicht auf MQTT zurück geschrieben werden soll
+        :param entries: die einträge die gespeichert werden sollen, wenn None werden die einträge von ``self.get_entires()`` genommen
+        :param from_mqtt: ob der aufruf von MQTT kommt und nicht auf MQTT zurückgeschrieben
+        werden soll
         """
         if not self.initialized:
             return
