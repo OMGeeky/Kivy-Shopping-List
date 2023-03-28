@@ -33,10 +33,18 @@ if kivy.utils.platform not in ["android", "ios"]:
 
 
 class ShoppingEntry(OneLineAvatarIconListItem):
+    """
+    Stellt einen Eintrag in der Einkaufsliste dar.
+    """
     edit_dialog = None
     is_checked = BooleanProperty(False)
 
     def __init__(self, text, **kwargs):
+        """
+        Instatiiert ein Einkaufslistenobjekt.
+
+        :param kwargs: Zusaetzliche Keyword-Parameter als ``dict``.
+        """
         super().__init__(**kwargs)
         self.initialized = False
         self.text = text
@@ -46,6 +54,11 @@ class ShoppingEntry(OneLineAvatarIconListItem):
     # region events
 
     def on_is_checked(self, *_):
+        """
+        Das Event wird abgefeuert, wenn der Eintrag angehakt wurde.
+
+        :param _: Zusaetzliche Parameter als ``list``.
+        """
         if not self.initialized:
             return
 
@@ -55,6 +68,11 @@ class ShoppingEntry(OneLineAvatarIconListItem):
 
     # endregion
     def get_shopping_list(self):
+        """
+        Gibt die aktuelle Einkaufsliste durch das Eltern-Element zurueck.
+
+        :return: Einkaufliste als ``list``.
+        """
         if not self.initialized:
             return None
         if self.parent:
@@ -63,11 +81,19 @@ class ShoppingEntry(OneLineAvatarIconListItem):
         return None
 
     def delete(self, shopping_entry):
+        """
+        Loescht den Eintrag aus der Einkaufsliste des Eltern-Elements.
+
+        :param shopping_entry: Loescht den angegebenen ``ShoppingEntry`` aus Einkaufsliste.
+        """
         list = self.get_shopping_list()
         if list:
             list.delete_entry(shopping_entry)
 
-    def edit_popup(self):
+    def open_edit_popup(self):
+        """
+        Oeffnet ein Popup zum Bearbeiten des Eintrag-Texts.
+        """
         if self.edit_dialog:
             return
 
@@ -93,6 +119,9 @@ class ShoppingEntry(OneLineAvatarIconListItem):
         self.edit_dialog.open()
 
     def save_changes(self):
+        """
+        Speichert alle Aenderungen am Eintrag lokal und per MQTT auf dem jeweiligen Server.
+        """
         if self.edit_dialog is None:
             return
 
@@ -109,10 +138,19 @@ class ShoppingEntry(OneLineAvatarIconListItem):
             list.save_entries()
 
     def get_translated(self, key: str) -> str:
+        """    
+        Liefert die Uebersetzung zu einem Text-Schluessel.
+
+        :param key: Schluessel als ``str`` zu uebersetzendem Text
+        :return: Uebersetzter Text als ``str``.
+        """
         settings = AppSettings.get_or_create()
         return TranslationProvider.get_translated(key, settings.language)
 
     def close_edit_popup(self):
+        """
+        Schliesst das Aendern-Popup sauber.
+        """
         if not self.edit_dialog:
             return
 
@@ -122,23 +160,46 @@ class ShoppingEntry(OneLineAvatarIconListItem):
         return super().__str__() + f"is_checked: {self.is_checked} text: {self.text}"
 
 class AddDialog(MDBoxLayout):
+    """
+    Stellt den Dialog zum Hinzufuegen und Aendern eines Einkaufslisten-Eintrags dar.
+    """
     text = StringProperty("")
 
     def __init__(self, text="", **kwargs):
+        """
+        Inistantiiert ein Popup-Objekt.
+
+        :param text: Default ist leer, gibt den initialen Anzeigetext als ``str`` an.
+        :param kwargs: Zusaetzliche Keyword-Parameter als ``dict``.
+        """
         super().__init__(**kwargs)
         self.text = text
 
     def get_translated(self, key: str) -> str:
+        """    
+        Liefert die Uebersetzung zu einem Text-Schluessel.
+
+        :param key: Schluessel als ``str`` zu uebersetzendem Text.
+        :return: Uebersetzter Text als ``str``.
+        """
         settings = AppSettings.get_or_create()
         return TranslationProvider.get_translated(key, settings.language)
 
 
 class ShoppingEntryScreen(Screen):
+    """
+    Screen zum Anzeigen und Bearbeiten der Einkaufsliste.
+    """
     add_dialog = None
     entries = ListProperty([])
     sort_reverse = BooleanProperty(False)
 
     def __init__(self, **kwargs):
+        """
+        Instantiiert das Einkaufsliste-Screen-Objekt.
+
+        :param kwargs: Zusaetzliche Keyword-Parameter als ``dict``.
+        """
         super().__init__(**kwargs)
         self.initialized = False
         self.update_from_file()
@@ -147,6 +208,11 @@ class ShoppingEntryScreen(Screen):
     # region events
 
     def on_bestaetigen(self, *_):
+        """
+        Event wird gefeuert, wenn das Popup bestaetigt wurde.
+
+        :param _: Nur fuer Event-Uebergabe, nicht fuer unsere Logik relevant.
+        """
         if self.add_dialog is None:
             return
 
@@ -159,6 +225,11 @@ class ShoppingEntryScreen(Screen):
         self.add_dialog.dismiss()
 
     def on_sort_reverse(self, *_):
+        """
+        Event wird gefeuert, wenn die Einkaufsliste neu sortiert werden soll.
+
+        :param _: Nur fuer Event-Uebergabe, nicht fuer unsere Logik relevant.
+        """
         print("on_sort_reverse", self.sort_reverse)
         entries = self.get_entries()
         self.entries = self.sort(entries, self.sort_reverse)
@@ -171,7 +242,9 @@ class ShoppingEntryScreen(Screen):
     # region update entries
 
     def update_from_file(self):
-        """Liest die liste aus der JSON-Datei"""
+        """
+        Liest die Einkaufsliste aus der JSON-Datei.
+        """
         try:
             entries = read_entries_from_files()
         except OSError:
@@ -181,9 +254,10 @@ class ShoppingEntryScreen(Screen):
 
     def update_from_mqtt(self, msg_dict):
         """
-        Wird durch MQTT-Subscribe aufgerufen, wenn sich die Liste ändert.
+        Wird durch MQTT-Subscribe aufgerufen, wenn sich die Liste aendert.
+        Aktualisiert die Liste mit den neuen Eintraegen.
 
-        Aktualisiert die Liste mit den neuen Einträgen
+        :param msg_dict: Gesamte Einkaufsliste als ``dict``.
         """
         self.from_mqtt = True
         self.set_entries(msg_dict["entries"], from_mqtt=True)
@@ -193,7 +267,9 @@ class ShoppingEntryScreen(Screen):
     # region add entry
 
     def open_add_popup(self):
-        """Öffnet das Popup zum hinzufügen eines Eintrags"""
+        """
+        Oeffnet das Popup zum Hinzufuegen eines Eintrags.
+        """
         if self.add_dialog:
             return
 
@@ -219,12 +295,20 @@ class ShoppingEntryScreen(Screen):
         self.add_dialog.open()
 
     def close_add_popup(self):
+        """
+        Schliesst das Hinzufuegen-Popup.
+        """
         if not self.add_dialog:
             return
 
         self.add_dialog = None
 
     def add_shopping_entry(self, text):
+        """
+        Fuegt der Einkaufsliste einen Eintrag hinzu.
+
+        :param text: Eintrag-Text als ``str``.
+        """
         entry = ShoppingEntry(text=text)
         self.ids["shopping_list"].add_widget(entry)
         self.save_entries()
@@ -233,6 +317,9 @@ class ShoppingEntryScreen(Screen):
 
     @mainthread
     def set_entries_widgets(self):
+        """
+        Setzt die einzelnen Widgets pro Einkauflisteneintrag auf der Oberflaeche.
+        """
         print("set_entries_widgets", self)
         self.ids["shopping_list"].clear_widgets()
         for entry in self.entries:
@@ -241,18 +328,25 @@ class ShoppingEntryScreen(Screen):
             self.ids["shopping_list"].add_widget(shopping_entry)
 
     def delete_entry(self, entry: ShoppingEntry):
+        """
+        Loescht einen Eintrag aus der Einkaufsliste.
+
+        :param entry: Ein Eintrag als ``ShoppingEntry``.
+        """
         print("remove_entry called", entry)
         self.ids.shopping_list.remove_widget(entry)
         self.save_entries()
 
     def save_entries(self, entries: Optional[list] = None, from_mqtt=False):
         """
-        Speichert die Einträge in einer JSON datei und wenn ``"from_mqtt" == False`` ist,
-        sendet es die Einträge auch an MQTT zur synchronisation
+        Speichert die Eintraege in einer JSON datei und wenn ``"from_mqtt" == False`` ist,
+        sendet es die Eintraege auch an MQTT zur Synchronisation.
 
-        :param entries: die einträge die gespeichert werden sollen, wenn None werden die einträge von ``self.get_entires()`` genommen
-        :param from_mqtt: ob der aufruf von MQTT kommt und nicht auf MQTT zurückgeschrieben
-        werden soll
+        :param entries: Die Eintraege, die gespeichert werden sollen, wenn ``None`` werden die
+        Eintraege von ``self.get_entries()`` genommen.
+
+        :param from_mqtt: Ob der Aufruf von MQTT kommt und nicht auf MQTT zurueckgeschrieben
+        werden soll.
         """
         if not self.initialized:
             return
@@ -276,6 +370,11 @@ class ShoppingEntryScreen(Screen):
             app.mqtt.publish(entries_dict)
 
     def get_entries(self):
+        """
+        Gibt alle Eintraege der Einkaufliste zurueck.
+
+        :return: Alle Eintraege der Einkaufliste als ``list``.
+        """
         entries = []
         for entry in self.ids.shopping_list.children:
             entry_dict = {"is_checked": entry.is_checked, "text": entry.text}
@@ -285,14 +384,22 @@ class ShoppingEntryScreen(Screen):
 
     @staticmethod
     def sort(entries, reverse) -> list:
+        """
+        Sortiert die Einkaufliste andhand der Status und dem Text.
+
+        :param entries: Die Einkauflisten-Eintraege als ``list``.
+        :param reverse: Gibt als ``bool`` an, ob umgekehrt soriert werden soll.
+        :return: Sortierte ``list`` der Eintraege.
+        """
         return sorted(entries, key=lambda entry: (entry["is_checked"], entry["text"]), reverse=reverse)
 
     def set_entries(self, entries: List[Dict[str, Union[str, bool]]], from_mqtt=False):
         """
-        Setzt die werte der liste auf die mitgegebenen einträge und speichert diese
+        Setzt die Werte der Liste auf die mitgegebenen Eintraege und speichert diese.
 
-        :param entries: die neuen einträge
-        :param from_mqtt: ob der aufruf von MQTT kommt und nicht auf MQTT zurück geschrieben werden soll
+        :param entries: Die neuen Eintraege als ``list``.
+        :param from_mqtt: Als ``bool``, ob der Aufruf von MQTT kommt und nicht auf MQTT
+        zurueckgeschrieben werden soll.
         """
         print("set_entries called", entries, self)
         self.save_entries(entries, from_mqtt=from_mqtt)
@@ -302,15 +409,27 @@ class ShoppingEntryScreen(Screen):
     # region general
 
     def toggle_sort(self):
+        """
+        Setzt die umgekehrte Sortierung.
+        """
         self.sort_reverse = not self.sort_reverse
 
     def navigate_to_settings(self):
-        """Navigiert zur Einstellungs-Seite"""
+        """
+        Navigiert zur Einstellungs-Seite
+        """
         self.save_entries()
         self.manager.transition.direction = "left"
         self.manager.current = "settings"
 
     def get_translated(self, key) -> str:
+        """    
+        Liefert die Uebersetzung zu einem Text-Schluessel.
+
+        :param key: Schluessel als ``str`` zu uebersetzendem Text.
+        :return: Uebersetzter Text als ``str``.
+        """
+
         language = app.settings.language
         return TranslationProvider.get_translated(key, language)
 
@@ -320,7 +439,15 @@ class ShoppingEntryScreen(Screen):
     # endregion
 
 class SettingsScreen(Screen):
+    """
+    Screen zum Anzeigen und Bearbeiten der Einstellungen.
+    """
     def __init__(self, **kwargs):
+        """
+        Instatiiert einen Einstellung-Screen.
+
+        :param kwargs: Zusaetzliche Keyword-Parameter als ``dict``.
+        """
         super().__init__(**kwargs)
         self.initialized = False
 
@@ -354,6 +481,9 @@ class SettingsScreen(Screen):
         self.initialized = True
 
     def apply_mqtt_settings(self):
+        """
+        Speichert neue MQTT-Einstellungen, sofern noetig.
+        """
         if (
             self.previous_mqtt_server != app.settings.mqtt_server
             or self.previous_mqtt_topic != app.settings.mqtt_topic
@@ -371,38 +501,64 @@ class SettingsScreen(Screen):
             app.mqtt.connect()
 
     def navigate_to_shopping_list(self):
+        """
+        Navigiert zur Einkaufliste-Seite.
+        """
         self.apply_mqtt_settings()
         self.manager.transition.direction = "right"
         self.manager.current = "shopping"
 
     def show_languages_menu(self):
+        """
+        Oeffnet das Dropdown-Menu der Sprachauswahl.
+        """
         self.menu.open()
 
     def set_item(self, language_key):
+        """
+        Setze die neue Sprache bei Auswahl eines Items aus dem Dropdown-Menu.
+
+        :param language_key: Schluessel zur Sprache als ``str``.
+        """
         self.language_key = language_key
         language = LANGUAGES.get(language_key)
         self.ids.language_drop_down.set_item(language)
         self.menu.dismiss()
 
     def get_translated(self, key) -> str:
+        """    
+        Liefert die Uebersetzung zu einem Text-Schluessel.
+
+        :param key: Schluessel als ``str`` zu uebersetzendem Text.
+        :return: Uebersetzter Text als ``str``.
+        """
+
         language = app.settings.language
         return TranslationProvider.get_translated(key, language)
 
     def update_language(self):
+        """
+        Aktualisiert auf die ausgewaehlte Sprache.
+        """
         if not self.initialized:
             return
         print("update_language")
         self.update_settings()
         toast(self.get_translated("change_setting_restart_alert"))
-        # TODO (1): eventuell ohne restart
 
     def switch_theme(self):
+        """
+        Wechselt zwischen einem Light- und einem Dark-Theme.
+        """
         if not self.initialized:
             return
         self.update_settings()
         app.update_theme()
 
     def update_settings(self):
+        """
+        Speichert die Einstellungen der App neu.
+        """
         if not self.initialized:
             return
         print("update_settings")
@@ -416,13 +572,26 @@ class SettingsScreen(Screen):
 
 
 class ShoppingListApp(MDApp):
+    """
+    Geruest der gesamten App.
+    """
     settings = ObjectProperty(AppSettings(), rebind=True)
 
     def __init__(self, **kwargs):
+        """
+        Instantiiert ein Objekt der App.
+
+        :param kwargs: Zusaetzliche Keyword-Parameter als ``dict``.
+        """
         super().__init__(**kwargs)
         self.mqtt: MqttClient = None  # type: ignore
 
     def build(self):
+        """
+        Startet die App und baut dabei die einzelnen Screens und den MQTT-Client auf
+
+        :return: Einen ``ScreenManger`` zur Navigation.
+        """
         self.title = "Shopping List App"
         self.settings = AppSettings.get_or_create()
         print(self.settings)
@@ -475,6 +644,9 @@ class ShoppingListApp(MDApp):
         return sm
 
     def update_theme(self):
+        """
+        Setze das jeweils gegenteilige Theme.
+        """
         self.theme_cls.primary_palette = "Gray"
         self.theme_cls.accent_palette = "BlueGray"
 
