@@ -608,7 +608,6 @@ class ShoppingListApp(MDApp):
         print(src_path)
         TranslationProvider.src_dir = src_path
 
-        # TODO @Tom Theme anpassen
         self.update_theme()
 
         sm = ScreenManager()
