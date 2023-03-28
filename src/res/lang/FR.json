@@ -13,5 +13,5 @@
     "mqtt-topic": "MQTT-Topic",
     "mqtt-username": "nom d'utilisateur MQTT",
     "mqtt-password": "Mot de passe MQTT",
-    "change_setting_restart_alert": "TODO: #SPRACHE"
+    "change_setting_restart_alert": "Cette modification ne sera effective qu'après un redémarrage de l'application."
 }
