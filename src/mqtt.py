@@ -7,11 +7,14 @@ import json
 def _get_broker_and_port(broker: str, port: int) -> tuple[str, int]:
     """
     Teilt die Broker-Adresse in Broker und Port auf.
+    Wenn der Port in der Broker-Adresse angegeben ist, wird er aus der Broker-Adresse entfernt und
+    der Port-Parameter ignoriert.
 
-    Wenn der Port in der Broker-Adresse angegeben ist, wird er aus der Broker-Adresse entfernt und der Port-Parameter ignoriert.
-    :param broker: der hostname oder die IP-Adresse des Brokers (kann auch Port enthalten)
-    :param port: der Port der verwendet wird, wenn der Port nicht in der Broker-Adresse angegeben ist
-    :return: (broker, port) als Tuple
+    :param broker: Der Hostname oder die IP-Adresse des Brokers (kann auch Port enthalten) als
+    ``str``.
+    :param port: Der Port als ``int`` der verwendet wird, wenn der Port nicht in der Broker-Adresse
+    angegeben ist.
+    :return: (broker, port) als Tuple.
     """
     print("getting broker and port", broker, port)
 
@@ -24,7 +27,7 @@ def _get_broker_and_port(broker: str, port: int) -> tuple[str, int]:
 
 class MqttClient:
     """
-    Klasse zum Verbinden mit einem MQTT-Broker
+    Klasse zum Verbinden mit einem MQTT-Broker.
     """
     def __init__(
         self,
@@ -52,13 +55,14 @@ class MqttClient:
         password: Optional[str] = None,
     ):
         """
-        Setzt die Verbindungsdaten für den MQTT-Broker
+        Setzt die Verbindungsdaten für den MQTT-Broker.
 
-        :param broker: die Adresse des Brokers
-        :param topic: die topic die der Client standardmäßig verwendet
-        :param port: Port des Brokers, kann auch durch : in der Broker-Adresse angegeben werden
-        :param username: Username zum Verbinden mit dem Broker
-        :param password: passwort zum Verbinden mit dem Broker
+        :param broker: Die Adresse des Brokers als ``str``.
+        :param topic: Die Topic ``str``, die der Client standardmäßig verwendet.
+        :param port: Port des Brokers als ``int``, kann auch durch : in der Broker-Adresse
+        angegeben werden.
+        :param username: Username als ``str`` zum Verbinden mit dem Broker.
+        :param password: Passwort als ``str`` zum Verbinden mit dem Broker.
         """
         broker, port = _get_broker_and_port(broker, port)
         self.__broker = broker
@@ -69,9 +73,11 @@ class MqttClient:
 
     def parse_callback(self, msg, callback: Optional[Callable]):
         """
-        Verarbeitet die empfangenen Nachrichten und ruft die angegebene Callback-Funktion auf
-        :param msg: die nachricht die empfangen wurde
-        :param callback: [optional] die Callback-Funktion die aufgerufen werden soll (wenn nicht angegeben wird die Callback-Funktion der Klasse verwendet)
+        Verarbeitet die empfangenen Nachrichten und ruft die angegebene Callback-Funktion auf.
+
+        :param msg: Die Nachricht als ``str``, die empfangen wurde.
+        :param callback: [optional] Die Callback-Funktion als ``Callable``, die aufgerufen werden
+        soll (wenn nicht angegeben wird die Callback-Funktion der Klasse verwendet).
         """
         if callback is None:
             callback = self.__subscribe_callback
@@ -82,9 +88,10 @@ class MqttClient:
     def on_connect(return_code: int) -> None:
         """
         Wird aufgerufen, wenn eine Verbindung zum MQTT-Broker hergestellt wurde.
+        Gibt lediglich eine Meldung aus.
 
-        Macht selbst nicht viel, außer eine Meldung auszugeben.
-        :param return_code: anhand dessen wird entschieden ob die Verbindung erfolgreich war
+        :param return_code: Mitgabe als ``int``, wodurch entschieden wird, ob die Verbindung
+        erfolgreich war.
         """
         if return_code == 0:
             print("Connected to MQTT Broker!")
@@ -95,10 +102,12 @@ class MqttClient:
         self, msg: dict, topic: Optional[str] = None, retain: bool = True
     ) -> None:
         """
-        Sendet eine Nachricht an den MQTT-Broker
-        :param msg: die zu sendenden Daten als dict (wird automatisch in JSON umgewandelt)
-        :param topic: [optional] die topic an welche die Nachricht gesendet werden soll (wenn nicht angegeben wird die topic der Klasse verwendet)
-        :param retain: ob bei der Nachricht die retain-Flag gesetzt werden soll
+        Sendet eine Nachricht an den MQTT-Broker.
+
+        :param msg: Die zu sendenden Daten als ``dict`` (wird automatisch in JSON umgewandelt).
+        :param topic: [optional] Die Topic als ``str`` an welche die Nachricht gesendet werden soll
+        (wenn nicht angegeben wird die topic der Klasse verwendet).
+        :param retain: Ob bei der Nachricht die retain-Flag gesetzt werden soll, als ``bool``.
         """
         if self.__client is None:
             print("publish called but mqtt-client is None", self)
@@ -116,8 +125,11 @@ class MqttClient:
 
     def subscribe(self, callback=None) -> None:
         """
-        Abonniert die topic der Klasse und ruft die angegebene Callback-Funktion auf, wenn eine Nachricht empfangen wird
-        :param callback: die Callback-Funktion die aufgerufen werden soll (wenn nicht angegeben wird die Callback-Funktion der Klasse verwendet)
+        Abonniert die Topic der Klasse und ruft die angegebene Callback-Funktion auf, wenn eine
+        Nachricht empfangen wird.
+
+        :param callback: Die Callback-Funktion als ``Callable``, die aufgerufen werden soll
+        (wenn nicht angegeben, wird die Callback-Funktion der Klasse verwendet).
         """
         if self.__connection_error:
             return
@@ -155,8 +167,8 @@ class MqttClient:
     def disconnect(self) -> None:
         """
         Trennt die Verbindung zum MQTT-Broker.
-
-        Muss nicht explizit aufgerufen werden, da die Klasse sich selbst beim Löschen automatisch trennt
+        Muss nicht explizit aufgerufen werden, da die Klasse sich selbst beim Loeschen automatisch
+        trennt.
         """
         if self.__client and self.__connection_error is False:
             print("Disconnecting from MQTT broker...")
