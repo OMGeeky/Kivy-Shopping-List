@@ -11,7 +11,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 
 version = 0.1
-requirements = python3,kivy, paho-mqtt, kivymd
+requirements = python3,kivy=2.1.0, paho-mqtt=1.6.1, kivymd=1.0.2
 
 orientation = portrait
 fullscreen = 0
