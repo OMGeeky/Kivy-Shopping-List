@@ -137,3 +137,4 @@ dmypy.json
 bin/
 
 files/*
+.idea/*
